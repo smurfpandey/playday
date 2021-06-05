@@ -4,6 +4,6 @@ table! {
         name -> Varchar,
         email -> Varchar,
         created_at -> Timestamp,
-        last_login -> Nullable<Timestamp>,
+        last_login -> Timestamp,
     }
 }

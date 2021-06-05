@@ -1,10 +1,14 @@
+use diesel::prelude::PgConnection;
+use diesel::r2d2::{self, ConnectionManager};
 use oauth2::basic::{
     BasicClient, BasicErrorResponse, BasicRevocationErrorResponse, BasicTokenIntrospectionResponse,
     BasicTokenResponse, BasicTokenType,
 };
-use oauth2::{AuthUrl, ClientId, ClientSecret, StandardRevocableToken, TokenUrl};
+use oauth2::StandardRevocableToken;
 use serde::Deserialize;
 use tera::Tera;
+
+pub type DBPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 #[derive(Clone)]
 pub struct AppState {

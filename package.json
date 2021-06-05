@@ -11,10 +11,12 @@
     "watch": "webpack --watch",
     "start:client": "npm run dev && npm run watch",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:server": "cargo-watch -x run"
+    "start:server": "cargo-watch -x run",
+    "start": "concurrently \"docker-compose up -d\" \"npm run start:client\" \"npm run start:server\""
   },
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
+    "concurrently": "^6.2.0",
     "css-loader": "^5.2.6",
     "mini-css-extract-plugin": "^1.6.0",
     "postcss": "^8.3.0",

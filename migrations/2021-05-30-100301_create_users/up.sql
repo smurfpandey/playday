@@ -4,7 +4,7 @@ CREATE TABLE users (
     name VARCHAR NOT NULL,
     email VARCHAR NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE  NOT NULL,
-    last_login TIMESTAMP WITHOUT TIME ZONE,
+    last_login TIMESTAMP WITHOUT TIME ZONE NOT NULL,
 
     UNIQUE(email)
 );
