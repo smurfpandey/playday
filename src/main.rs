@@ -20,6 +20,7 @@ mod db;
 mod models;
 mod routes;
 mod types;
+mod igdb;
 
 fn establish_connection() -> types::DBPool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -60,6 +61,7 @@ async fn main() -> std::io::Result<()> {
     // });
     HttpServer::new(move || {
         let tera = Tera::new("templates/**/*").unwrap();
+        let igdb_client = web::Data::new(igdb::IGDB::new().unwrap());
         App::new()
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&[0; 32])
@@ -69,9 +71,10 @@ async fn main() -> std::io::Result<()> {
             .data(pool.clone())
             .data(tera)
             .data(get_oauth_client())
+            .app_data(igdb_client.clone())
             .route("/", web::get().to(routes::home))
             .route("/login", web::get().to(routes::login))
-            //.route("/api/games", web::get().to(routes::get_games))
+            .route("/api/search", web::get().to(routes::search_igdb_games))
             .service(Files::new("/static", "./static"))
             .service(
                 web::resource("/login/callback")

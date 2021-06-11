@@ -6,6 +6,7 @@ use http::header::{HeaderValue, ACCEPT, AUTHORIZATION};
 use http::method::Method;
 use oauth2::reqwest::http_client;
 use oauth2::{AccessToken, AuthorizationCode, CsrfToken, RedirectUrl, Scope, TokenResponse};
+use qstring::QString;
 use std::borrow::Cow;
 use std::env;
 use tera::{Context, Tera};
@@ -13,13 +14,32 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::db;
+use crate::igdb::IGDB;
 use crate::models;
 use crate::types;
 
 pub const MIME_TYPE_JSON: &str = "application/json";
 
-pub async fn home(tera: web::Data<Tera>) -> impl Responder {
+fn is_logged_in(id: Identity) -> Option<models::User> {
+    if let Some(user_info) = id.identity() {
+        let user: models::User = serde_json::from_str(&user_info).unwrap();
+
+        return Some(user);
+    } else {
+        return None;
+    }
+}
+
+pub async fn home(tera: web::Data<Tera>, id: Identity) -> impl Responder {
     let mut tera_data = Context::new();
+
+    if let Some(user) = is_logged_in(id) {
+        tera_data.insert("user", &user);
+    } else {
+        return HttpResponse::TemporaryRedirect()
+            .header("location", "/login")
+            .finish();
+    }
 
     let games = [
         models::Game {
@@ -174,4 +194,31 @@ pub async fn login_callback(
     Ok(HttpResponse::TemporaryRedirect()
         .header("location", "/")
         .finish())
+}
+
+pub async fn search_igdb_games(
+    req: HttpRequest,
+    id: Identity,
+    igdb_client: web::Data<IGDB>,
+) -> Result<HttpResponse, Error> {
+    if let Some(_user) = is_logged_in(id) {
+    } else {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+
+    let query_str = req.query_string(); // "name=ferret"
+    let qs = QString::from(query_str);
+    let keyword = qs.get("keyword"); // "ferret"
+
+    if keyword.is_none() {
+        return Ok(HttpResponse::BadRequest().finish());
+    }
+
+    let search_keyword = keyword.unwrap();
+    let games = igdb_client.search_games(search_keyword).unwrap();
+    let games_str = serde_json::to_string(&games).unwrap();
+
+    return Ok(HttpResponse::Ok()
+        .content_type("application/json")
+        .body(games_str));
 }
