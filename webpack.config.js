@@ -11,7 +11,8 @@ const config = {
         filename: 'bundle.js',
     },
     resolve: {
-        extensions: ['.js', '.jsx', '.css']
+        extensions: ['.js', '.jsx', '.css'],
+        alias: { vue: 'vue/dist/vue.esm-bundler.js' }
     },
     plugins: [
         new webpack.ProgressPlugin(),
@@ -25,6 +26,10 @@ const config = {
                 test: /\.css$/i,
                 use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
             },
+            {
+                test: /\.svg$/,
+                loader: 'svg-inline-loader'
+            }
         ],
     },
 };

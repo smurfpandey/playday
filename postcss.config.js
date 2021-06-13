@@ -1,3 +1,7 @@
 module.exports = {
-    plugins: ["tailwindcss"]
+    plugins: [
+        'postcss-assets',
+        'postcss-inline-svg',
+        'tailwindcss'
+    ]
 };

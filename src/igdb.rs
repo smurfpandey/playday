@@ -2,7 +2,7 @@ use chrono::{Duration, Utc};
 use reqwest::header;
 use serde::Deserialize;
 use std::env;
-use std::sync::{ Mutex, MutexGuard };
+use std::sync::{ Mutex };
 
 use crate::types::Result;
 
@@ -28,12 +28,23 @@ pub struct IGDB {
 #[serde(rename_all = "camelCase")]
 pub struct IGDBGame {
     pub id: i64,
-    pub cover: Cover,
+
+    #[serde(default)]
+    pub cover:Option<Cover>,
+
+    #[serde(default)]
     #[serde(rename = "first_release_date")]
-    pub first_release_date: i64,
+    pub first_release_date: Option<i64>,
+
+    #[serde(default)]
     #[serde(rename = "involved_companies")]
-    pub involved_companies: Vec<InvolvedCompany>,
+    pub involved_companies: Option<Vec<InvolvedCompany>>,
+
     pub name: String,
+
+    #[serde(default)]
+    #[serde(rename = "total_rating")]
+    pub total_rating: Option<f64>,
 }
 #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -130,21 +141,26 @@ impl IGDB {
         let req_body = format!("search \"{name_to_search}\"; \
             fields first_release_date, involved_companies.company.name, \
             involved_companies.developer, involved_companies.publisher, name,
-            cover.image_id, parent_game.*, version_parent.*; \
+            cover.image_id, parent_game.*, version_parent.*, total_rating; \
             where version_parent = null & parent_game = null;\
         ", name_to_search=search_keyword);
 
-        let res = self.client.post(req_url)
+        let resp = self.client.post(req_url)
             .header(
                 http::header::AUTHORIZATION,
                 format!("Bearer {}", &token.access_token.clone())
             )
             .body(req_body)
             .send()
-            .unwrap()
-            .json::<Vec<IGDBGame>>()
             .unwrap();
 
-        Ok(res)
+        // Print the status code
+        log::info!("API Status: {}", resp.status().as_u16());
+        //log::info!("API Response: {}", resp.text().unwrap());
+
+        let resp_body = resp.json::<Vec<IGDBGame>>()
+            .unwrap();
+
+        Ok(resp_body)
     }
 }
