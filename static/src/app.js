@@ -4,10 +4,9 @@ import './app.css';
 import { createApp } from 'vue';
 import * as dayjs from 'dayjs';
 import reject from 'lodash/reject';
+import lodashFind from 'lodash/find';
 
 function App() {
-
-    const fnSaveSyncFlow = async (event) => { }
 
     const fnToggleModal = (event) => {
         const body = document.querySelector('body');
@@ -19,13 +18,8 @@ function App() {
 
     const fnAttachEventListener = (pageName) => {
         if (pageName === 'home') {
-            const elem_btnSaveSyncFlow = document.getElementById('btnSaveSyncFlow');
             const elem_btnShowModal = document.getElementById('btnShowModalAddGame');
-            const elem_btnCloseModal = document.querySelector('.modal-close');
-
-            elem_btnSaveSyncFlow.addEventListener('click', fnSaveSyncFlow);
             elem_btnShowModal.addEventListener('click', fnToggleModal);
-            elem_btnCloseModal.addEventListener('click', fnToggleModal);
         }
     };
 
@@ -40,6 +34,13 @@ function App() {
                 }
             },
             methods: {
+                closeModal() {
+                    fnToggleModal();
+                    this.keyword = '';
+                    this.isSearching = false;
+                    this.games = [];
+                    this.selectedGames = [];
+                },
                 async search(event) {
                     const searchKeyword = this.keyword;
                     if (!searchKeyword) {
@@ -61,11 +62,19 @@ function App() {
 
                     this.games = await response.json();
                 },
-                selectGame(gameId, gameName) {
-                    this.selectedGames.push({
-                        id: gameId,
-                        name: gameName
-                    });
+                isGameSelected(gameId) {
+                    const thisGame = lodashFind(this.selectedGames, (game) => { return game.id === gameId });
+
+                    if (thisGame) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                },
+                selectGame(igdbGame) {
+                    if (!this.isGameSelected(igdbGame.id)) {
+                        this.selectedGames.push(igdbGame);
+                    }
                 },
                 nukeSelf(gameId) {
                     this.selectedGames = reject(this.selectedGames, (game) => { return game.id === gameId });
