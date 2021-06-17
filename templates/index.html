@@ -148,7 +148,7 @@
                 <!--Title-->
                 <div class="flex justify-between items-center pb-3">
                     <p class="text-2xl font-bold">Add Game!</p>
-                    <div class="modal-close cursor-pointer z-50">
+                    <div class="modal-close cursor-pointer z-50" v-on:click="closeModal">
                         <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                             viewBox="0 0 18 18">
                             <path
@@ -163,7 +163,7 @@
                     <div
                         class="mt-6 bg-transparent border rounded-md dark:border-gray-700 focus-within:ring ring-primary focus-within:border-teal-500 ring-opacity-40">
                         <div class="flex flex-wrap justify-between md:flex-row">
-                            <input id="txtSearchGames" v-model="keyword" @keyup.enter="search" type="text" name="query"
+                            <input id="txtSearchGames" v-model="keyword" type="text" name="query"
                                 placeholder="Search Components" required="required"
                                 class="flex-1 px-4 h-10 lg:h-12 m-1 text-gray-700 placeholder-gray-400 bg-transparent border-none appearance-none dark:text-gray-200 focus:outline-none focus:placeholder-transparent focus:ring-0">
                             <button id="btnSearchGames" v-on:click="search" v-show="keyword.length > 0"
@@ -246,7 +246,7 @@
                                                     <span>{{ parseInt(game.total_rating, 10) }}</span>
                                                 </div>
                                             </div>
-                                            <button v-on:click="selectGame(game.id, game.name)"
+                                            <button v-if="!isGameSelected(game.id)" v-on:click="selectGame(game)"
                                                 class="btnSelectGame mb-2 md:mb-0 bg-gray-900 px-5 py-2 shadow-sm tracking-wider text-white rounded-full hover:bg-gray-800"
                                                 type="button" aria-label="like">Select</button>
                                         </div>
