@@ -98,10 +98,11 @@
                     <div
                         class="mt-6 bg-transparent border rounded-md dark:border-gray-700 focus-within:ring ring-primary focus-within:border-teal-500 ring-opacity-40">
                         <div class="flex flex-wrap justify-between md:flex-row">
-                            <input id="txtSearchGames" v-model="keyword" type="text" name="query"
+                            <input id="txtSearchGames" v-on:keyup.enter="search" v-model="keyword" type="text" name="query"
                                 placeholder="Search Components" required="required"
                                 class="flex-1 px-4 h-10 lg:h-12 m-1 text-gray-700 placeholder-gray-400 bg-transparent border-none appearance-none dark:text-gray-200 focus:outline-none focus:placeholder-transparent focus:ring-0">
-                            <button id="btnSearchGames" v-on:click="search" v-show="keyword.length > 0"
+                            <button id="btnSearchGames" v-on:click="search" v-show="keyword.length > 0" v-bind:disabled="isSearching"
+                                v-bind:class="{'cursor-not-allowed': isSearching}"
                                 class="flex justify-center items-center w-full lg:w-12 lg:h-12 p-2 lg:p-0 m-1 text-white transition-colors duration-200 transform rounded-md bg-green-600 hover:bg-green-700 focus:outline-none focus:bg-green-700">
                                 <svg v-bind:class="{hidden: isSearching}" class="icon-search w-6 h-6"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -212,6 +213,7 @@
                         <span id="spFormError" class="text-red-500"></span>
                     </div>
                     <button v-show="selectedGames.length > 0" v-on:click="addToWishlist()" v-bind:disabled="isSaving"
+                        v-bind:class="{'cursor-not-allowed': isSaving}"
                         class="inline-flex items-center justify-center border border-transparent font-medium bg-gray-800 text-white hover:bg-gray-900 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full"
                         type="button" style="transition: all 0.15s ease 0s;">
                         <svg v-bind:class="{hidden: !isSaving}" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"

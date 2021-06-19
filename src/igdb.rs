@@ -27,7 +27,7 @@ pub struct IGDB {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IGDBGame {
-    pub id: i64,
+    pub id: i32,
 
     #[serde(default)]
     pub cover: Option<Cover>,

@@ -41,7 +41,10 @@ pub fn create_user(db_conn: &PgConnection, new_user: &User) -> Result<bool, dies
 pub fn add_games_to_wishlist(db_conn: &PgConnection, games: &Vec<WishedGame>) -> Result<bool, diesel::result::Error> {
     use crate::schema::wished_games::dsl::*;
 
-    diesel::insert_into(wished_games).values(games).execute(db_conn)?;
+    diesel::insert_into(wished_games).values(games)
+        .on_conflict(igdb_id)
+        .do_nothing()
+        .execute(db_conn)?;
 
     Ok(true)
 }

@@ -209,37 +209,41 @@ pub async fn add_games_to_wishlist(
     id: Identity,
     str_igdb_game: String,
 ) -> Result<HttpResponse, Error> {
-    if let Some(_user) = is_logged_in(id) {
-    } else {
-        return Ok(HttpResponse::Unauthorized().finish());
-    }
 
-    // use web::block to offload blocking Diesel code without blocking server thread
-    Ok(web::block(move || {
-        let igdb_games: Vec<IGDBGame> = serde_json::from_str(&str_igdb_game).unwrap();
-        let mut wished_games: Vec<models::WishedGame> = Vec::new();
+    match is_logged_in(id) {
+        None => return Ok(HttpResponse::Unauthorized().finish()),
+        Some(user) => {
 
-        for game in igdb_games.iter() {
-            wished_games.push(models::WishedGame {
-                id: Uuid::new_v4(),
-                title: game.name.to_owned(),
-                added_on: Utc::now().naive_utc(),
-                igdb_info: serde_json::to_value(game).unwrap(),
-            });
+            // use web::block to offload blocking Diesel code without blocking server thread
+            Ok(web::block(move || {
+                let igdb_games: Vec<IGDBGame> = serde_json::from_str(&str_igdb_game).unwrap();
+                let mut wished_games: Vec<models::WishedGame> = Vec::new();
+
+                for game in igdb_games.iter() {
+                    wished_games.push(models::WishedGame {
+                        id: Uuid::new_v4(),
+                        user_id: user.id.to_owned(),
+                        title: game.name.to_owned(),
+                        igdb_id: game.id.to_owned(),
+                        added_on: Utc::now().naive_utc(),
+                        igdb_info: serde_json::to_value(game).unwrap(),
+                    });
+                }
+
+                let conn = pool.get().expect("couldn't get db connection from pool");
+                let _added = match db::add_games_to_wishlist(&conn, &wished_games) {
+                    Ok(added)  => added,
+                    Err(e) => return Err(e),
+                };
+
+                Ok(wished_games)
+            })
+            .await
+            .map(|wished_games| HttpResponse::Ok().json(wished_games))
+            .map_err(|error| {
+                log::error!("Error saving games to wishlist! {}", error);
+                HttpResponse::InternalServerError().finish()
+            })?)
         }
-
-        let conn = pool.get().expect("couldn't get db connection from pool");
-        let _added = match db::add_games_to_wishlist(&conn, &wished_games) {
-            Ok(added)  => added,
-            Err(e) => return Err(e),
-        };
-
-        Ok(wished_games)
-    })
-    .await
-    .map(|wished_games| HttpResponse::Ok().json(wished_games))
-    .map_err(|error| {
-        log::error!("Error saving games to wishlist! {}", error);
-        HttpResponse::InternalServerError().finish()
-    })?)
+    }
 }
