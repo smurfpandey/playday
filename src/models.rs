@@ -1,5 +1,5 @@
-use super::schema::users;
-use diesel::{Queryable, Insertable};
+use super::schema::{users, wished_games};
+use diesel::{Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
@@ -8,13 +8,14 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub created_at: chrono::NaiveDateTime,
-    pub last_login: chrono::NaiveDateTime
+    pub last_login: chrono::NaiveDateTime,
 }
 
-#[derive(Serialize)]
-pub struct Game {
+#[derive(Clone, Serialize, Deserialize, Queryable, Insertable)]
+pub struct WishedGame {
     pub id: uuid::Uuid,
     pub title: String,
-    pub poster_url: String,
-    pub publisher: String,
+    pub added_on: chrono::NaiveDateTime,
+
+    pub igdb_info: serde_json::Value,
 }

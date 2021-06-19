@@ -74,7 +74,11 @@ async fn main() -> std::io::Result<()> {
             .app_data(igdb_client.clone())
             .route("/", web::get().to(routes::home))
             .route("/login", web::get().to(routes::login))
-            .route("/api/search", web::get().to(routes::search_igdb_games))
+            .service(
+                web::scope("/api")
+                    .route("/search", web::get().to(routes::search_igdb_games))
+                    .route("/wishlist", web::post().to(routes::add_games_to_wishlist))
+            )
             .service(Files::new("/static", "./static"))
             .service(
                 web::resource("/login/callback")

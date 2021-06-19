@@ -14,7 +14,7 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::db;
-use crate::igdb::IGDB;
+use crate::igdb::{IGDBGame, IGDB};
 use crate::models;
 use crate::types;
 
@@ -41,26 +41,7 @@ pub async fn home(tera: web::Data<Tera>, id: Identity) -> impl Responder {
             .finish();
     }
 
-    let games = [
-        models::Game {
-            id: Uuid::new_v4(),
-            title: String::from("Horizon Forbidden West"),
-            poster_url: String::from(
-                "https://images.igdb.com/igdb/image/upload/t_cover_big/co2gvu.jpg",
-            ),
-            publisher: String::from("Sony Interactive Entertainment"),
-        },
-        models::Game {
-            id: Uuid::new_v4(),
-            title: String::from("Halo Infinite"),
-            poster_url: String::from(
-                "https://images.igdb.com/igdb/image/upload/t_cover_big/co2dto.jpg",
-            ),
-            publisher: String::from("Xbox Game Studios"),
-        },
-    ];
     tera_data.insert("title", "Playday");
-    tera_data.insert("games", &games);
 
     let rendered = tera.render("index.html", &tera_data).unwrap();
     HttpResponse::Ok().body(rendered)
@@ -221,4 +202,44 @@ pub async fn search_igdb_games(
     return Ok(HttpResponse::Ok()
         .content_type("application/json")
         .body(games_str));
+}
+
+pub async fn add_games_to_wishlist(
+    pool: web::Data<types::DBPool>,
+    id: Identity,
+    str_igdb_game: String,
+) -> Result<HttpResponse, Error> {
+    if let Some(_user) = is_logged_in(id) {
+    } else {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+
+    // use web::block to offload blocking Diesel code without blocking server thread
+    Ok(web::block(move || {
+        let igdb_games: Vec<IGDBGame> = serde_json::from_str(&str_igdb_game).unwrap();
+        let mut wished_games: Vec<models::WishedGame> = Vec::new();
+
+        for game in igdb_games.iter() {
+            wished_games.push(models::WishedGame {
+                id: Uuid::new_v4(),
+                title: game.name.to_owned(),
+                added_on: Utc::now().naive_utc(),
+                igdb_info: serde_json::to_value(game).unwrap(),
+            });
+        }
+
+        let conn = pool.get().expect("couldn't get db connection from pool");
+        let _added = match db::add_games_to_wishlist(&conn, &wished_games) {
+            Ok(added)  => added,
+            Err(e) => return Err(e),
+        };
+
+        Ok(wished_games)
+    })
+    .await
+    .map(|wished_games| HttpResponse::Ok().json(wished_games))
+    .map_err(|error| {
+        log::error!("Error saving games to wishlist! {}", error);
+        HttpResponse::InternalServerError().finish()
+    })?)
 }

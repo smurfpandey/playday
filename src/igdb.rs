@@ -1,8 +1,8 @@
 use chrono::{Duration, Utc};
 use reqwest::header;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::env;
-use std::sync::{ Mutex };
+use std::sync::Mutex;
 
 use crate::types::Result;
 
@@ -10,9 +10,9 @@ use crate::types::Result;
 struct TwitchToken {
     access_token: String,
     expires_in: i64,
-    token_type: String,
 }
 
+#[allow(dead_code)]
 struct AccessToken {
     access_token: String,
     create_at: chrono::NaiveDateTime,
@@ -21,16 +21,16 @@ struct AccessToken {
 
 pub struct IGDB {
     token: Mutex<AccessToken>,
-    client: reqwest::blocking::Client
+    client: reqwest::blocking::Client,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IGDBGame {
     pub id: i64,
 
     #[serde(default)]
-    pub cover:Option<Cover>,
+    pub cover: Option<Cover>,
 
     #[serde(default)]
     #[serde(rename = "first_release_date")]
@@ -70,11 +70,8 @@ pub struct Company {
     pub name: String,
 }
 
-
 const API_URL: &str = "https://api.igdb.com/v4";
 const TOKEN_API_URL: &str = "https://id.twitch.tv/oauth2/token";
-const IGDB_COVER_IMG_URL: &str = "https://images.igdb.com/igdb/image/upload/t_cover_big";
-
 impl IGDB {
     fn generate_access_token() -> std::result::Result<AccessToken, reqwest::Error> {
         let client_id = env::var("IGDB_CLIENT_ID").expect("IGDB_CLIENT_ID must be set");
@@ -86,10 +83,7 @@ impl IGDB {
             client_id=client_id,
             client_secret=client_secret
         );
-        let token = client
-            .post(req_url)
-            .send()?
-            .json::<TwitchToken>()?;
+        let token = client.post(req_url).send()?.json::<TwitchToken>()?;
 
         let now_utc = Utc::now().naive_utc();
         Ok(AccessToken {
@@ -106,13 +100,14 @@ impl IGDB {
 
         let req_client = reqwest::blocking::Client::builder()
             .default_headers(headers)
-            .build().unwrap();
+            .build()
+            .unwrap();
 
         Ok(IGDB {
-            token: Mutex::new(AccessToken{
+            token: Mutex::new(AccessToken {
                 access_token: String::from(""),
                 create_at: Utc::now().naive_utc(),
-                expire_at: Utc::now().naive_utc() + Duration::seconds(5)
+                expire_at: Utc::now().naive_utc() + Duration::seconds(5),
             }),
             client: req_client,
         })
@@ -137,18 +132,23 @@ impl IGDB {
 
         let token = self.token.lock().unwrap();
 
-        let req_url = format!("{url}/games", url=API_URL);
-        let req_body = format!("search \"{name_to_search}\"; \
+        let req_url = format!("{url}/games", url = API_URL);
+        let req_body = format!(
+            "search \"{name_to_search}\"; \
             fields first_release_date, involved_companies.company.name, \
             involved_companies.developer, involved_companies.publisher, name,
             cover.image_id, parent_game.*, version_parent.*, total_rating; \
             where version_parent = null & parent_game = null;\
-        ", name_to_search=search_keyword);
+        ",
+            name_to_search = search_keyword
+        );
 
-        let resp = self.client.post(req_url)
+        let resp = self
+            .client
+            .post(req_url)
             .header(
                 http::header::AUTHORIZATION,
-                format!("Bearer {}", &token.access_token.clone())
+                format!("Bearer {}", &token.access_token.clone()),
             )
             .body(req_body)
             .send()
@@ -158,8 +158,7 @@ impl IGDB {
         log::info!("API Status: {}", resp.status().as_u16());
         //log::info!("API Response: {}", resp.text().unwrap());
 
-        let resp_body = resp.json::<Vec<IGDBGame>>()
-            .unwrap();
+        let resp_body = resp.json::<Vec<IGDBGame>>().unwrap();
 
         Ok(resp_body)
     }

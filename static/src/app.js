@@ -29,6 +29,7 @@ function App() {
                 return {
                     keyword: '',
                     isSearching: false,
+                    isSaving: false,
                     games: [],
                     selectedGames: []
                 }
@@ -38,6 +39,7 @@ function App() {
                     fnToggleModal();
                     this.keyword = '';
                     this.isSearching = false;
+                    this.isSaving = false;
                     this.games = [];
                     this.selectedGames = [];
                 },
@@ -57,7 +59,7 @@ function App() {
                     this.isSearching = false;
 
                     if (response.status !== 200) {
-                        alert('Halla bol!');
+                        return alert('Halla bol!');
                     }
 
                     this.games = await response.json();
@@ -78,6 +80,25 @@ function App() {
                 },
                 nukeSelf(gameId) {
                     this.selectedGames = reject(this.selectedGames, (game) => { return game.id === gameId });
+                },
+                async addToWishlist() {
+                    if (this.selectedGames.length === 0) {
+                        return;
+                    }
+                    this.isSaving = true;
+                    const response = await fetch('/api/wishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8'
+                        },
+                        body: JSON.stringify(this.selectedGames)
+                    });
+                    this.isSaving = false;
+                    if (response.status !== 200) {
+                        return alert('Udi baba!');
+                    }
+
+                    this.closeModal();
                 }
             }
         });
