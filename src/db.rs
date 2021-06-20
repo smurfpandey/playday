@@ -55,3 +55,13 @@ pub fn get_games_from_wishlistt(db_conn: &PgConnection, usr_id: Uuid) -> Result<
     let results = wished_games.filter(user_id.eq(usr_id)).load::<WishedGame>(db_conn)?;
     Ok(results)
 }
+
+pub fn remove_game_from_wishlist(db_conn: &PgConnection, usr_id: Uuid, game_id: Uuid) -> Result<bool, diesel::result::Error> {
+    use crate::schema::wished_games::dsl::*;
+
+    diesel::delete(
+        wished_games.filter(id.eq(game_id).and(user_id.eq(usr_id)))
+    ).execute(db_conn)?;
+
+    Ok(true)
+}

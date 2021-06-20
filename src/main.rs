@@ -79,6 +79,7 @@ async fn main() -> std::io::Result<()> {
                     .route("/search", web::get().to(routes::search_igdb_games))
                     .route("/wishlist", web::get().to(routes::get_games_in_wishlist))
                     .route("/wishlist", web::post().to(routes::add_games_to_wishlist))
+                    .route("/wishlist/{game_id}", web::delete().to(routes::remove_game_from_wishlist))
             )
             .service(Files::new("/static", "./static"))
             .service(

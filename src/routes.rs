@@ -270,3 +270,28 @@ pub async fn get_games_in_wishlist(
         }
     }
 }
+
+// DELETE /api/wishlist/{gameId}
+pub async fn remove_game_from_wishlist(
+    pool: web::Data<types::DBPool>,
+    id: Identity,
+    path: web::Path<Uuid>,
+) -> Result<HttpResponse, Error> {
+    match is_logged_in(id) {
+        None => return Ok(HttpResponse::Unauthorized().finish()),
+        Some(user) => {
+            let game_id = path.into_inner();
+            let conn = pool.get().expect("couldn't get db connection from pool");
+
+            // use web::block to offload blocking Diesel code without blocking server thread
+            let _remove = web::block(move || db::remove_game_from_wishlist(&conn, user.id, game_id))
+                .await
+                .map_err(|e| {
+                    log::error!("Error removing game from wishlist! {}", e);
+                HttpResponse::InternalServerError().finish()
+                })?;
+
+            Ok(HttpResponse::NoContent().finish())
+        }
+    }
+}
