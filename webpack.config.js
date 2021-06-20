@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { VueLoaderPlugin } = require('vue-loader');
 
 const config = {
     context: path.resolve(__dirname, 'static/src'),
@@ -12,16 +13,21 @@ const config = {
     },
     resolve: {
         extensions: ['.js', '.jsx', '.css'],
-        alias: { vue: 'vue/dist/vue.esm-bundler.js' }
+        alias: { vue: '@vue/runtime-dom' }
     },
     plugins: [
         new webpack.ProgressPlugin(),
         new CleanWebpackPlugin(),
         new MiniCssExtractPlugin(),
+        new VueLoaderPlugin(),
     ],
     devtool: 'source-map',
     module: {
         rules: [
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
+            },
             {
                 test: /\.css$/i,
                 use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader'],
@@ -29,7 +35,7 @@ const config = {
             {
                 test: /\.svg$/,
                 loader: 'svg-inline-loader'
-            }
+            },
         ],
     },
 };

@@ -35,6 +35,7 @@ pub async fn home(tera: web::Data<Tera>, id: Identity) -> impl Responder {
 
     if let Some(user) = is_logged_in(id) {
         tera_data.insert("user", &user);
+        tera_data.insert("str_user", &serde_json::to_string(&user).unwrap());
     } else {
         return HttpResponse::TemporaryRedirect()
             .header("location", "/login")
@@ -197,11 +198,8 @@ pub async fn search_igdb_games(
 
     let search_keyword = keyword.unwrap();
     let games = igdb_client.search_games(search_keyword).unwrap();
-    let games_str = serde_json::to_string(&games).unwrap();
 
-    return Ok(HttpResponse::Ok()
-        .content_type("application/json")
-        .body(games_str));
+    return Ok(HttpResponse::Ok().json(games));
 }
 
 pub async fn add_games_to_wishlist(
@@ -209,11 +207,9 @@ pub async fn add_games_to_wishlist(
     id: Identity,
     str_igdb_game: String,
 ) -> Result<HttpResponse, Error> {
-
     match is_logged_in(id) {
         None => return Ok(HttpResponse::Unauthorized().finish()),
         Some(user) => {
-
             // use web::block to offload blocking Diesel code without blocking server thread
             Ok(web::block(move || {
                 let igdb_games: Vec<IGDBGame> = serde_json::from_str(&str_igdb_game).unwrap();
@@ -232,7 +228,7 @@ pub async fn add_games_to_wishlist(
 
                 let conn = pool.get().expect("couldn't get db connection from pool");
                 let _added = match db::add_games_to_wishlist(&conn, &wished_games) {
-                    Ok(added)  => added,
+                    Ok(added) => added,
                     Err(e) => return Err(e),
                 };
 
@@ -242,6 +238,33 @@ pub async fn add_games_to_wishlist(
             .map(|wished_games| HttpResponse::Ok().json(wished_games))
             .map_err(|error| {
                 log::error!("Error saving games to wishlist! {}", error);
+                HttpResponse::InternalServerError().finish()
+            })?)
+        }
+    }
+}
+
+pub async fn get_games_in_wishlist(
+    pool: web::Data<types::DBPool>,
+    id: Identity,
+) -> Result<HttpResponse, Error> {
+    match is_logged_in(id) {
+        None => return Ok(HttpResponse::Unauthorized().finish()),
+        Some(user) => {
+            // use web::block to offload blocking Diesel code without blocking server thread
+            Ok(web::block(move || {
+                let conn = pool.get().expect("couldn't get db connection from pool");
+                let wished_games = match db::get_games_from_wishlistt(&conn, user.id) {
+                    Ok(games) => games,
+                    Err(e) => return Err(e),
+                };
+
+                Ok(wished_games)
+            })
+            .await
+            .map(|wished_games| HttpResponse::Ok().json(wished_games))
+            .map_err(|error| {
+                log::error!("Error getting games from wishlist! {}", error);
                 HttpResponse::InternalServerError().finish()
             })?)
         }

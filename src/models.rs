@@ -11,12 +11,12 @@ pub struct User {
     pub last_login: chrono::NaiveDateTime,
 }
 
-#[derive(Clone, Serialize, Deserialize, Queryable, Insertable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
 pub struct WishedGame {
     pub id: uuid::Uuid,
     pub title: String,
-    pub added_on: chrono::NaiveDateTime,
-    pub user_id: uuid::Uuid,
     pub igdb_id: i32,
     pub igdb_info: serde_json::Value,
+    pub added_on: chrono::NaiveDateTime,
+    pub user_id: uuid::Uuid,
 }

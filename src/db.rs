@@ -48,3 +48,10 @@ pub fn add_games_to_wishlist(db_conn: &PgConnection, games: &Vec<WishedGame>) ->
 
     Ok(true)
 }
+
+pub fn get_games_from_wishlistt(db_conn: &PgConnection, usr_id: Uuid) -> Result<Vec<WishedGame>, diesel::result::Error> {
+    use crate::schema::wished_games::dsl::*;
+
+    let results = wished_games.filter(user_id.eq(usr_id)).load::<WishedGame>(db_conn)?;
+    Ok(results)
+}
