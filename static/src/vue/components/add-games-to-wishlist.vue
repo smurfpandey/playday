@@ -1,63 +1,14 @@
 <template>
-  <button @click="showModal" class="
-      bg-gray-900
-      px-5
-      py-2
-      text-sm
-      shadow-sm
-      font-semibold
-      tracking-wider
-      text-white
-      rounded-full
-      hover:bg-gray-800
-    ">
+  <button @click="showModal" class="bg-gray-900 px-5 py-2 text-sm shadow-sm font-semibold tracking-wider text-white rounded-full hover:bg-gray-800">
     Add Game
   </button>
-  <teleport to="body">
-    <div v-show="modalOpen" class="
-        modal
-        transition-opacity
-        duration-300
-        fixed
-        w-full
-        h-full
-        top-0
-        left-0
-        bg-smoke-light
-        flex
-        items-center
-        justify-center
-      ">
-      <div v-show="modalOpen" class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
-
+  <modal-popup :modalOpen="modalOpen">
+    <slot>
       <transition enter-active-class="transition ease-out duration-300 transform " enter-from-class="opacity-0 translate-y-10 scale-95" enter-to-class="opacity-100 translate-y-0 scale-100" leave-active-class="ease-in duration-200" leave-from-class="opacity-100 translate-y-0 scale-100" leave-to-class="opacity-0 translate-y-10 translate-y-0 scale-95">
-        <div v-show="modalOpen" class="
-            modal-container
-            bg-white
-            w-11/12
-            md:max-w-5xl
-            mx-auto
-            rounded
-            shadow-lg
-            z-50
-            overflow-y-auto
-          ">
+        <div v-show="modalOpen" class="modal-container bg-white w-11/12 md:max-w-5xl mx-auto rounded shadow-lg z-50 overflow-y-auto">
           <div id="searchGamesApp" class="modal-content py-4 text-left px-6">
             <svg style="position: absolute; width: 0; height: 0; overflow: hidden" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
               <defs>
-                <symbol id="icon-calendar" viewBox="0 0 26 28" class="text-gray-700">
-                  <path d="M2 26h4.5v-4.5h-4.5v4.5zM7.5 26h5v-4.5h-5v4.5zM2 20.5h4.5v-5h-4.5v5zM7.5 20.5h5v-5h-5v5zM2 14.5h4.5v-4.5h-4.5v4.5zM13.5 26h5v-4.5h-5v4.5zM7.5 14.5h5v-4.5h-5v4.5zM19.5 26h4.5v-4.5h-4.5v4.5zM13.5 20.5h5v-5h-5v5zM8 7v-4.5c0-0.266-0.234-0.5-0.5-0.5h-1c-0.266 0-0.5 0.234-0.5 0.5v4.5c0 0.266 0.234 0.5 0.5 0.5h1c0.266 0 0.5-0.234 0.5-0.5zM19.5 20.5h4.5v-5h-4.5v5zM13.5 14.5h5v-4.5h-5v4.5zM19.5 14.5h4.5v-4.5h-4.5v4.5zM20 7v-4.5c0-0.266-0.234-0.5-0.5-0.5h-1c-0.266 0-0.5 0.234-0.5 0.5v4.5c0 0.266 0.234 0.5 0.5 0.5h1c0.266 0 0.5-0.234 0.5-0.5zM26 6v20c0 1.094-0.906 2-2 2h-22c-1.094 0-2-0.906-2-2v-20c0-1.094 0.906-2 2-2h2v-1.5c0-1.375 1.125-2.5 2.5-2.5h1c1.375 0 2.5 1.125 2.5 2.5v1.5h6v-1.5c0-1.375 1.125-2.5 2.5-2.5h1c1.375 0 2.5 1.125 2.5 2.5v1.5h2c1.094 0 2 0.906 2 2z"></path>
-                </symbol>
-                <symbol id="icon-calendar-check-o" viewBox="0 0 26 28" class="text-green-700">
-                  <path d="M20.359 15.062l-8 8c-0.203 0.187-0.516 0.187-0.719 0l-4.5-4.5c-0.187-0.203-0.187-0.516 0-0.703l0.719-0.719c0.187-0.187 0.5-0.187 0.703 0l3.437 3.437 6.937-6.937c0.203-0.187 0.516-0.187 0.703 0l0.719 0.719c0.187 0.187 0.187 0.5 0 0.703zM2 26h22v-16h-22v16zM8 7v-4.5c0-0.281-0.219-0.5-0.5-0.5h-1c-0.281 0-0.5 0.219-0.5 0.5v4.5c0 0.281 0.219 0.5 0.5 0.5h1c0.281 0 0.5-0.219 0.5-0.5zM20 7v-4.5c0-0.281-0.219-0.5-0.5-0.5h-1c-0.281 0-0.5 0.219-0.5 0.5v4.5c0 0.281 0.219 0.5 0.5 0.5h1c0.281 0 0.5-0.219 0.5-0.5zM26 6v20c0 1.094-0.906 2-2 2h-22c-1.094 0-2-0.906-2-2v-20c0-1.094 0.906-2 2-2h2v-1.5c0-1.375 1.125-2.5 2.5-2.5h1c1.375 0 2.5 1.125 2.5 2.5v1.5h6v-1.5c0-1.375 1.125-2.5 2.5-2.5h1c1.375 0 2.5 1.125 2.5 2.5v1.5h2c1.094 0 2 0.906 2 2z">
-                    <title>Access to this calendar is authorised</title>
-                  </path>
-                </symbol>
-                <symbol id="icon-calendar-times-o" viewBox="0 0 26 28" class="text-red-700">
-                  <path d="M17.359 21.641l-0.719 0.719c-0.187 0.187-0.5 0.187-0.703 0l-2.938-2.953-2.938 2.953c-0.203 0.187-0.516 0.187-0.703 0l-0.719-0.719c-0.187-0.187-0.187-0.5 0-0.703l2.953-2.938-2.953-2.938c-0.187-0.203-0.187-0.516 0-0.703l0.719-0.719c0.187-0.187 0.5-0.187 0.703 0l2.938 2.938 2.938-2.938c0.203-0.187 0.516-0.187 0.703 0l0.719 0.719c0.187 0.187 0.187 0.5 0 0.703l-2.938 2.938 2.938 2.938c0.187 0.203 0.187 0.516 0 0.703zM2 26h22v-16h-22v16zM8 7v-4.5c0-0.281-0.219-0.5-0.5-0.5h-1c-0.281 0-0.5 0.219-0.5 0.5v4.5c0 0.281 0.219 0.5 0.5 0.5h1c0.281 0 0.5-0.219 0.5-0.5zM20 7v-4.5c0-0.281-0.219-0.5-0.5-0.5h-1c-0.281 0-0.5 0.219-0.5 0.5v4.5c0 0.281 0.219 0.5 0.5 0.5h1c0.281 0 0.5-0.219 0.5-0.5zM26 6v20c0 1.094-0.906 2-2 2h-22c-1.094 0-2-0.906-2-2v-20c0-1.094 0.906-2 2-2h2v-1.5c0-1.375 1.125-2.5 2.5-2.5h1c1.375 0 2.5 1.125 2.5 2.5v1.5h6v-1.5c0-1.375 1.125-2.5 2.5-2.5h1c1.375 0 2.5 1.125 2.5 2.5v1.5h2c1.094 0 2 0.906 2 2z">
-                    <title>Access to this calendar is not authorised</title>
-                  </path>
-                </symbol>
                 <symbol id="icon-loading" viewBox="0 0 32 32" class="text-black">
                   <path d="M16 0c-8.711 0-15.796 6.961-15.995 15.624 0.185-7.558 5.932-13.624 12.995-13.624 7.18 0 13 6.268 13 14 0 1.657 1.343 3 3 3s3-1.343 3-3c0-8.837-7.163-16-16-16zM16 32c8.711 0 15.796-6.961 15.995-15.624-0.185 7.558-5.932 13.624-12.995 13.624-7.18 0-13-6.268-13-14 0-1.657-1.343-3-3-3s-3 1.343-3 3c0 8.837 7.163 16 16 16z"></path>
                 </symbol>
@@ -77,22 +28,15 @@
             <div class="flex flex-col mb-4">
               <div class="mt-6 bg-transparent border rounded-md dark:border-gray-700 focus-within:ring ring-primary focus-within:border-teal-500 ring-opacity-40">
                 <div class="flex flex-wrap justify-between md:flex-row">
-                  <input id="txtSearchGames" v-on:keyup.enter="search" v-model="keyword" type="text" name="query" placeholder="Search Components" required="required" class="
-                      flex-1
-                      px-4
-                      h-10
-                      lg:h-12
-                      m-1
-                      text-gray-700
+                  <input id="txtSearchGames" v-on:keyup.enter="search" v-model="keyword" type="text" name="query" placeholder="Search Components" required="required" class="flex-1
+                      px-4 h-10 lg:h-12 m-1 text-gray-700
                       placeholder-gray-400
                       bg-transparent
                       border-none
                       appearance-none
                       dark:text-gray-200
                       focus:outline-none
-                      focus:placeholder-transparent
-                      focus:ring-0
-                    " />
+                      focus:placeholder-transparent focus:ring-0" />
                   <button id="btnSearchGames" v-on:click="search" v-show="keyword.length > 0" v-bind:disabled="isSearching" v-bind:class="{ 'cursor-not-allowed': isSearching }" class="
                       flex
                       justify-center
@@ -184,18 +128,20 @@
           </div>
         </div>
       </transition>
-    </div>
-  </teleport>
+    </slot>
+  </modal-popup>
 </template>
 
 <script>
 import reject from "lodash/reject";
 import lodashFind from "lodash/find";
 import GameSearchResult from "./game-search-result.vue";
+import ModalPopup from "./modal-popup.vue";
 
 export default {
   components: {
     GameSearchResult,
+    ModalPopup,
   },
 
   data() {
