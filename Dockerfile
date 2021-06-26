@@ -16,15 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
     libssl-dev
 
-RUN USER=root cargo new --bin playday
-WORKDIR ./playday
-COPY Cargo.toml Cargo.lock ./
-RUN cargo build --release
-RUN rm src/*.rs
-
 COPY . ./
 
-RUN rm ./target/release/deps/playday*
 RUN cargo build --release
 
 ##########################################
@@ -55,13 +48,14 @@ RUN groupadd $APP_USER \
 # Create and switch to a new user
 WORKDIR /usr/app
 
-COPY --from=builder ./playday/target/release/playday ./playday
-COPY --from=frontend-build ./static/dist ./static/dist
-COPY ./templates ./templates
+COPY --from=builder ./target/release/playday_web ./playday_web
+COPY --from=builder ./target/release/playday_celery_beat ./playday_celery_beat
+COPY --from=builder ./target/release/playday_celery_worker ./playday_celery_worker
+COPY --from=frontend-build ./playday_web/static/dist ./static/dist
+COPY ./playday_web/templates ./templates
 COPY ./diesel.toml .
 
 RUN chown -R $APP_USER:$APP_USER .
 USER $APP_USER
 
-
-CMD ["./playday"]
+CMD ["./playday_web"]

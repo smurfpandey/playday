@@ -1,0 +1,30 @@
+[package]
+name = "playday_web"
+version = "0.1.0"
+authors = ["Neeraj Verma <github@smurfpandey.me>"]
+edition = "2018"
+license = "MIT"
+
+[dependencies]
+actix-files = "0.5.0"
+actix-identity = "0.3.1"
+actix-web = "3.3.2"
+anyhow = "1.0"
+chrono = "0.4.19"
+diesel = { version = "1.4.6", features = ["postgres", "chrono", "r2d2", "serde_json", "uuidv07"] }
+dotenv = "0.15.0"
+env_logger = "0.8.3"
+http = "0.2.4"
+log = "0.4"
+oauth2 = "4.1.0"
+playday = { version = "0.1.0", optional = false, path = "../playday" }
+qstring = "0.7.2"
+r2d2 = "0.8.9"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+tera = "1.5.0"
+tokio = { version = "1", features = ["full"] }
+url = "2.2.2"
+uuid = { version = "0.8.2", features = ["serde", "v4"] }
+

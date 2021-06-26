@@ -1,32 +1,11 @@
-[package]
-name = "playday"
-version = "0.1.0"
-authors = ["Neeraj Verma <github@smurfpandey.me>"]
-edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-actix-files = "0.5.0"
-actix-identity = "0.3.1"
-actix-web = "3.3.2"
-chrono = "0.4.19"
-diesel = { version = "1.4.6", features = ["postgres", "chrono", "r2d2", "serde_json", "uuidv07"] }
-dotenv = "0.15.0"
-env_logger = "0.8.3"
-http = "0.2.4"
-log = "0.4"
-oauth2 = "4.0"
-qstring = "0.7.2"
-r2d2 = "0.8.9"
-serde = "1.0"
-serde_derive = "1.0"
-serde_json = "1.0"
-reqwest = { version = "0.11", features = ["json", "blocking"] }
-tera = "1.5.0"
-tokio = { version = "1", features = ["full"] }
-url = "2.2.2"
-uuid = { version = "0.8.2", features = ["serde", "v4"] }
+[workspace]
+members = [
+    "playday",
+    "playday_celery_beat",
+    "playday_celery_worker",
+    "playday_web",
+]
 
 [patch.crates-io]
-oauth2 = { git = 'https://github.com/ramosbugs/oauth2-rs', branch = "main" }
+celery = { git = 'https://github.com/rusty-celery/rusty-celery', branch = 'main' }
+oauth2 = { git = 'https://github.com/ramosbugs/oauth2-rs', branch = 'main' }

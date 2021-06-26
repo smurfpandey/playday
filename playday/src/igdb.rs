@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::env;
 use std::sync::Mutex;
 
-use crate::types::Result;
+use anyhow::Result;
 
 #[derive(Deserialize)]
 struct TwitchToken {

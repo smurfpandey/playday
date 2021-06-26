@@ -284,12 +284,13 @@ pub async fn remove_game_from_wishlist(
             let conn = pool.get().expect("couldn't get db connection from pool");
 
             // use web::block to offload blocking Diesel code without blocking server thread
-            let _remove = web::block(move || db::remove_game_from_wishlist(&conn, user.id, game_id))
-                .await
-                .map_err(|e| {
-                    log::error!("Error removing game from wishlist! {}", e);
-                HttpResponse::InternalServerError().finish()
-                })?;
+            let _remove =
+                web::block(move || db::remove_game_from_wishlist(&conn, user.id, game_id))
+                    .await
+                    .map_err(|e| {
+                        log::error!("Error removing game from wishlist! {}", e);
+                        HttpResponse::InternalServerError().finish()
+                    })?;
 
             Ok(HttpResponse::NoContent().finish())
         }

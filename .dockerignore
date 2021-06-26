@@ -8,14 +8,12 @@ node_modules
 
 # ... except for dependencies and source
 # Rust
+!playday*/
 !Cargo.toml
 !Cargo.lock
 !diesel.toml
-!src/
-!templates/
 
 # Frontend
-!static/src/
 !package.json
 !package-lock.json
 !postcss.config.js

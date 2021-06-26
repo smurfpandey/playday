@@ -1,7 +1,3 @@
-#[macro_use]
-extern crate diesel;
-pub mod schema;
-
 use std::env;
 
 use actix_files::Files;
@@ -13,14 +9,10 @@ use diesel::r2d2::{self, ConnectionManager};
 use dotenv::dotenv;
 use oauth2::basic::BasicClient;
 use oauth2::{AuthUrl, ClientId, ClientSecret, TokenUrl};
-use tera::{Tera};
+use tera::Tera;
 
-mod auth;
-mod db;
-mod models;
+use playday::{db, igdb, models, types};
 mod routes;
-mod types;
-mod igdb;
 
 fn establish_connection() -> types::DBPool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -30,7 +22,6 @@ fn establish_connection() -> types::DBPool {
         .build(manager)
         .expect("Failed to create pool.")
 }
-
 
 fn get_oauth_client() -> types::OAuthClient {
     let client_id =
@@ -55,10 +46,6 @@ async fn main() -> std::io::Result<()> {
 
     let pool: types::DBPool = establish_connection();
 
-    // let app_state = web::Data::new(types::AppState {
-    //     oauth: get_oauth_client(),
-    //     tera: tera,
-    // });
     HttpServer::new(move || {
         let tera = Tera::new("templates/**/*").unwrap();
         let igdb_client = web::Data::new(igdb::IGDB::new().unwrap());
@@ -79,7 +66,10 @@ async fn main() -> std::io::Result<()> {
                     .route("/search", web::get().to(routes::search_igdb_games))
                     .route("/wishlist", web::get().to(routes::get_games_in_wishlist))
                     .route("/wishlist", web::post().to(routes::add_games_to_wishlist))
-                    .route("/wishlist/{game_id}", web::delete().to(routes::remove_game_from_wishlist))
+                    .route(
+                        "/wishlist/{game_id}",
+                        web::delete().to(routes::remove_game_from_wishlist),
+                    ),
             )
             .service(Files::new("/static", "./static"))
             .service(
@@ -90,7 +80,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
     })
     .workers(4) // <- Start 4 workers
-    .bind("127.0.0.1:8000")
+    .bind("0.0.0.0:8000")
     .expect("Can not bind to port 8000")
     .run()
     .await

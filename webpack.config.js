@@ -5,10 +5,10 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { VueLoaderPlugin } = require('vue-loader');
 
 const config = {
-    context: path.resolve(__dirname, 'static/src'),
+    context: path.resolve(__dirname, 'playday_web/static/src'),
     entry: './app.js',
     output: {
-        path: path.resolve(__dirname, 'static/dist'),
+        path: path.resolve(__dirname, 'playday_web/static/dist'),
         filename: 'bundle.js',
     },
     resolve: {
