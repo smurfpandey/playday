@@ -1,0 +1,23 @@
+/target
+dist
+node_modules
+.env
+
+# Ignore everything
+**
+
+# ... except for dependencies and source
+# Rust
+!Cargo.toml
+!Cargo.lock
+!diesel.toml
+!src/
+!templates/
+
+# Frontend
+!static/src/
+!package.json
+!package-lock.json
+!postcss.config.js
+!tailwind.config.js
+!webpack.config.js

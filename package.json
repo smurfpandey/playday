@@ -11,7 +11,7 @@
     "watch": "webpack --watch",
     "start:client": "npm run dev && npm run watch",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:server": "docker-compose up -d && cargo-watch -x run",
+    "start:server": "docker-compose up -d db && cargo-watch -x run",
     "start": "concurrently \"npm run start:client\" \"npm run start:server\""
   },
   "devDependencies": {
