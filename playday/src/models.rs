@@ -19,4 +19,5 @@ pub struct WishedGame {
     pub igdb_info: serde_json::Value,
     pub added_on: chrono::NaiveDateTime,
     pub user_id: uuid::Uuid,
+    pub pc_release_date: i64,
 }

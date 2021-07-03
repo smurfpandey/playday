@@ -16,6 +16,7 @@ table! {
         igdb_info -> Jsonb,
         added_on -> Timestamp,
         user_id -> Uuid,
+        pc_release_date -> Int8,
     }
 }
 

@@ -20,6 +20,8 @@ oauth2 = "4.1.0"
 playday = { version = "0.1.0", optional = false, path = "../playday" }
 qstring = "0.7.2"
 r2d2 = "0.8.9"
+sentry = "0.21.0"
+sentry-actix = "0.21.0"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"

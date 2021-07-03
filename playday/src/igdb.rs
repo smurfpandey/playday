@@ -43,6 +43,13 @@ pub struct IGDBGame {
     pub name: String,
 
     #[serde(default)]
+    pub platforms: Vec<Platform>,
+
+    #[serde(default)]
+    #[serde(rename = "release_dates")]
+    pub release_dates: Option<Vec<ReleaseDate>>,
+
+    #[serde(default)]
     #[serde(rename = "total_rating")]
     pub total_rating: Option<f64>,
 }
@@ -70,8 +77,34 @@ pub struct Company {
     pub name: String,
 }
 
+#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Platform {
+    pub id: i32,
+    pub name: String,
+
+    #[serde(default)]
+    #[serde(rename = "platform_family")]
+    pub platform_family: Option<i32>,
+    pub slug: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReleaseDate {
+    pub id: i32,
+
+    #[serde(default)]
+    pub date: Option<i64>,
+
+    pub human: String,
+    pub platform: Platform,
+}
+
 const API_URL: &str = "https://api.igdb.com/v4";
 const TOKEN_API_URL: &str = "https://id.twitch.tv/oauth2/token";
+const PC_PLATFORM_ID: i32 = 6;
+
 impl IGDB {
     fn generate_access_token() -> std::result::Result<AccessToken, reqwest::Error> {
         let client_id = env::var("IGDB_CLIENT_ID").expect("IGDB_CLIENT_ID must be set");
@@ -136,8 +169,11 @@ impl IGDB {
         let req_body = format!(
             "search \"{name_to_search}\"; \
             fields first_release_date, involved_companies.company.name, \
-            involved_companies.developer, involved_companies.publisher, name,
-            cover.image_id, parent_game.*, version_parent.*, total_rating; \
+            involved_companies.developer, involved_companies.publisher, \
+            name, cover.image_id, parent_game.*, version_parent.*, total_rating, \
+            release_dates.date, release_dates.*, release_dates.platform.slug, \
+            release_dates.platform.name, release_dates.platform.platform_family, \
+            platforms.name, platforms.slug; \
             where version_parent = null & parent_game = null;\
         ",
             name_to_search = search_keyword
@@ -161,5 +197,25 @@ impl IGDB {
         let resp_body = resp.json::<Vec<IGDBGame>>().unwrap();
 
         Ok(resp_body)
+    }
+}
+
+impl IGDBGame {
+    pub fn get_pc_release_date(&self) -> i64 {
+        match &self.release_dates {
+            None => return 0,
+            Some(release_dates) => {
+                for date in release_dates.iter() {
+                    if date.platform.id == PC_PLATFORM_ID {
+                        match date.date {
+                            None => return 0,
+                            Some(dt) => return dt
+                        }
+                    }
+                }
+
+                return 0
+            }
+        }
     }
 }

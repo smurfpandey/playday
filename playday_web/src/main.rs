@@ -4,8 +4,7 @@ use actix_files::Files;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
-use diesel::prelude::PgConnection;
-use diesel::r2d2::{self, ConnectionManager};
+
 use dotenv::dotenv;
 use oauth2::basic::BasicClient;
 use oauth2::{AuthUrl, ClientId, ClientSecret, TokenUrl};
@@ -13,15 +12,6 @@ use tera::Tera;
 
 use playday::{db, igdb, models, types};
 mod routes;
-
-fn establish_connection() -> types::DBPool {
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
-    let manager = ConnectionManager::<PgConnection>::new(database_url);
-    r2d2::Pool::builder()
-        .build(manager)
-        .expect("Failed to create pool.")
-}
 
 fn get_oauth_client() -> types::OAuthClient {
     let client_id =
@@ -44,7 +34,7 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
     env_logger::init();
 
-    let pool: types::DBPool = establish_connection();
+    let pool: types::DBPool = db::establish_pool_connection();
 
     HttpServer::new(move || {
         let tera = Tera::new("templates/**/*").unwrap();
@@ -55,6 +45,7 @@ async fn main() -> std::io::Result<()> {
                     .name("auth-cookie")
                     .secure(false),
             ))
+            .wrap(sentry_actix::Sentry::new())
             .data(pool.clone())
             .data(tera)
             .data(get_oauth_client())

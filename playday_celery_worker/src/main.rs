@@ -2,7 +2,7 @@ use anyhow::Result;
 use celery::broker::AMQPBroker;
 use dotenv::dotenv;
 
-use playday::tasks::add;
+use playday::tasks::whats_for_tomorrow;
 
 const QUEUE_NAME: &str = "playday_celery";
 
@@ -13,7 +13,7 @@ async fn main() -> Result<()> {
 
     let my_app = celery::app!(
         broker = AMQPBroker { std::env::var("AMQP_ADDR").unwrap() },
-        tasks = [add],
+        tasks = [whats_for_tomorrow],
         task_routes = [
             "*" => QUEUE_NAME,
         ],

@@ -223,6 +223,7 @@ pub async fn add_games_to_wishlist(
                         igdb_id: game.id.to_owned(),
                         added_on: Utc::now().naive_utc(),
                         igdb_info: serde_json::to_value(game).unwrap(),
+                        pc_release_date: game.get_pc_release_date()
                     });
                 }
 
@@ -254,7 +255,7 @@ pub async fn get_games_in_wishlist(
             // use web::block to offload blocking Diesel code without blocking server thread
             Ok(web::block(move || {
                 let conn = pool.get().expect("couldn't get db connection from pool");
-                let wished_games = match db::get_games_from_wishlistt(&conn, user.id) {
+                let wished_games = match db::get_games_from_wishlist(&conn, user.id) {
                     Ok(games) => games,
                     Err(e) => return Err(e),
                 };

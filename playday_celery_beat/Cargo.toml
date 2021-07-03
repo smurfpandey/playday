@@ -12,6 +12,7 @@ dotenv = "0.15.0"
 env_logger = "0.8.3"
 log = "0.4"
 playday = { version = "0.1.0", optional = false, path = "../playday" }
+sentry = "0.21.0"
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"

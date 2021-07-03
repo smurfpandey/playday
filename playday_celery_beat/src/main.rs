@@ -3,7 +3,7 @@ use celery::beat::CronSchedule;
 use celery::broker::AMQPBroker;
 use dotenv::dotenv;
 
-use playday::tasks::add;
+use playday::tasks::whats_for_tomorrow;
 
 const QUEUE_NAME: &str = "playday_celery";
 
@@ -17,9 +17,9 @@ async fn main() -> Result<()> {
         broker = AMQPBroker { std::env::var("AMQP_ADDR").unwrap() },
         tasks = [
             "long_running" => {
-                add,
+                whats_for_tomorrow,
                 schedule = CronSchedule::from_string("*/2 * * * *")?,
-                args = (2,3),
+                args = (),
             }
         ],
         task_routes = [
