@@ -17,18 +17,12 @@
         </div>
         <p class="mt-3"></p>
         <div class="flex py-4 text-sm text-gray-600">
-          <div class="flex-1 inline-flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            <p class="">{{ game.id }}</p>
+          <template v-for="release_date in game.release_dates" :key="release_date.id">
+          <div v-if="getPlatform(release_date.platform)" class="flex-1 inline-flex items-center mr-2">
+            <game-platform-icon :platform="getPlatform(release_date.platform)" />
+            <p class="" v-bind:title="$filters.epochToHuman(release_date.date)">{{ $filters.epochToRelative(release_date.date) }}</p>
           </div>
-          <div class="flex-1 inline-flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <p class="" v-bind:title="$filters.epochToHuman(game.first_release_date)">{{ $filters.epochToRelative(game.first_release_date) }}</p>
-          </div>
+          </template>
         </div>
         <div class="flex p-4 pb-2 border-t border-gray-200"></div>
         <div class="flex space-x-3 text-sm font-medium">
@@ -51,9 +45,11 @@
 
 <script>
 import RemoveGame from './remove-game.vue';
+import GamePlatformIcon from './game-platform-icon.vue';
 
 export default {
   components: {
+    GamePlatformIcon,
     RemoveGame,
   },
 
@@ -72,5 +68,19 @@ export default {
       default: false,
     },
   },
+
+  methods: {
+    getPlatform: (platform) => {
+      if(platform.id === 6) {
+        return { code: 'PC', name: platform.name };
+      }
+      if(platform.platform_family === 2) {
+        return { code: 'XBOX', name: platform.name };
+      }
+      if(platform.platform_family === 1) {
+        return { code: 'PS', name: platform.name };
+      }
+    },
+  }
 };
 </script>
