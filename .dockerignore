@@ -12,6 +12,7 @@ node_modules
 !Cargo.toml
 !Cargo.lock
 !diesel.toml
+!migrations
 
 # Frontend
 !package.json

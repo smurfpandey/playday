@@ -1,0 +1,19 @@
+---
+
+- name: Create app directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ app_directory }}"
+
+- name: Create postgres db & user
+  ansible.builtin.command: docker exec -it postgres /opt/scripts/create-database.sh testdb testuser testpass
+  args:
+    creates: "{{ app_directory }}/db_created"
+
+- name: Mark database creation
+  ansible.builtin.command: touch {{ app_directory }}/db_created
+  args:
+    creates: "{{ app_directory }}/db_created"
+

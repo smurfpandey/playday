@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: yes
+  handlers:
+    - import_tasks: handlers/main.yml
+  roles:
+    - { role: "app" }
+
+  tasks:
+    - name: Congratulations!
+      debug:
+        msg:
+          - "Your app is ready!"
