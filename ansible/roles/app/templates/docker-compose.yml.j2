@@ -1,0 +1,19 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  app:
+    image: {{ app_docker_image }}
+    container_name: "playday_web"
+    networks:
+      - {{ nginx_network_name }}
+      - {{ postgres_network_name }}
+      - default
+    environment:
+      DATABASE_URL: "postgres://{{ app_db_user }}:{{ app_db_pass }}@postgres/{{ app_db_name }}"
+      RUST_LOG: "info"
+      RUST_BACKTRACE: 1
+
+networks:
+  {{ nginx_network_name }}:
+    external: true
+  {{ postgres_network_name }}:
+    external: true

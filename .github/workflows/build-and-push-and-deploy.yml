@@ -2,8 +2,8 @@ name: build & push docker image
 
 on:
   # Triggers the workflow on push events but only for the main branch
-  push:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -80,4 +80,4 @@ jobs:
             [all]
             ${{ secrets.DO1_SERVER_NAME }} ansible_user=${{ secrets.DO1_SERVER_SUDO_USER }}
           options: |
-            --extra-vars ansible_become_pass=${{ secrets.DO1_SERVER_SUDO_PASS }}
+            --extra-vars "ansible_become_pass=${{ secrets.DO1_SERVER_SUDO_PASS }} app_docker_image=${{ env.DOCKER_IMAGE }}"

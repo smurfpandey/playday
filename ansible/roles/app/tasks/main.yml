@@ -8,12 +8,17 @@
     - "{{ app_directory }}"
 
 - name: Create postgres db & user
-  ansible.builtin.command: docker exec -it postgres /opt/scripts/create-database.sh testdb testuser testpass
+  ansible.builtin.command: docker exec -it postgres /opt/scripts/create-database.sh {{ app_db_name }} {{ app_db_user }} {{ app_db_pass }}
   args:
-    creates: "{{ app_directory }}/db_created"
+    creates: "{{ app_directory }}/db_created_{{ app_db_name }}"
 
 - name: Mark database creation
-  ansible.builtin.command: touch {{ app_directory }}/db_created
-  args:
-    creates: "{{ app_directory }}/db_created"
+  ansible.builtin.file:
+    path: "{{ app_directory }}/db_created_{{ app_db_name }}"
+    state: touch
 
+- name: Copy docker-compose.yml
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ app_directory }}/docker-compose.yml"
+  # notify: restart app
