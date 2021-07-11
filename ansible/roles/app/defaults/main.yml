@@ -1,0 +1,6 @@
+---
+
+app_directory: '/opt/playday'
+app_db_name: 'playday'
+app_db_user: 'playday'
+app_db_pass: ''
