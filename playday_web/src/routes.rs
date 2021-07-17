@@ -45,7 +45,9 @@ pub async fn home(tera: web::Data<Tera>, id: Identity) -> impl Responder {
     tera_data.insert("title", "Playday");
 
     let rendered = tera.render("index.html", &tera_data).unwrap();
-    HttpResponse::Ok().body(rendered)
+    HttpResponse::Ok()
+        .content_type("text/html; charset=UTF-8")
+        .body(rendered)
 }
 
 pub async fn login(
