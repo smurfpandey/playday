@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate diesel_migrations;
+
 use std::env;
 
 use actix_files::Files;
@@ -12,6 +15,8 @@ use tera::Tera;
 
 use playday::{db, igdb, models, types};
 mod routes;
+
+diesel_migrations::embed_migrations!();
 
 fn get_oauth_client() -> types::OAuthClient {
     let client_id =
@@ -35,6 +40,9 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     let pool: types::DBPool = db::establish_pool_connection();
+
+    // let _ = embedded_migrations::run_with_output(&pool.get().unwrap(), &mut std::io::stdout());
+    db::run_migrations(&pool.get().unwrap());
 
     HttpServer::new(move || {
         let tera = Tera::new("templates/**/*").unwrap();

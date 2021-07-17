@@ -1,3 +1,4 @@
+
 use std::env;
 
 use chrono::Utc;
@@ -8,6 +9,10 @@ use uuid::Uuid;
 
 use crate::models::{User, WishedGame};
 use crate::types;
+
+pub fn run_migrations(conn: &PgConnection) {
+    let _ = diesel_migrations::run_pending_migrations(&*conn);
+}
 
 pub fn establish_pool_connection() -> types::DBPool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
