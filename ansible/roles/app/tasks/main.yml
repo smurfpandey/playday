@@ -30,6 +30,12 @@
     dest: "{{ app_directory }}/docker-compose.yml"
   notify: restart app
 
+- name: Create nginx config for blog
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_config_directory }}/playday-smurfville-app.conf"
+  notify: reload nginx
+
 - name: Create app service file
   template:
     src: "{{ app_service_name }}.service.j2"

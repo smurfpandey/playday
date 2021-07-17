@@ -3,6 +3,7 @@
 app_directory: '/opt/playday'
 app_service_name: 'playday'
 app_docker_image: 'default'
+app_port: 8000
 app_db_name: 'playday'
 app_db_user: 'playday'
 app_db_pass: !vault |
@@ -20,3 +21,6 @@ nginx_webhost_directory: '/opt/nginx/web'
 postgres_network_name: 'postgres_default'
 
 docker_compose_binary: /usr/local/bin/docker-compose
+
+letsencrypt_cert_location: /etc/letsencrypt
+letsencrypt_cert_name: 'smurfville.app'
