@@ -6,6 +6,7 @@ app_docker_image: 'default'
 app_port: 8000
 app_db_name: 'playday'
 app_db_user: 'playday'
+domain_name: 'playday.smurfville.app'
 app_db_pass: !vault |
         $ANSIBLE_VAULT;1.1;AES256
         65343437323631373465623433373430336637323264616238616633326237623839663136333761
