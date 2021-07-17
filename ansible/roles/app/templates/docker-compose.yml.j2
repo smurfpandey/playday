@@ -1,4 +1,5 @@
-version: "3.9"  # optional since v1.27.0
+version: '3.2'
+
 services:
   {{ app_service_name }}:
     image: {{ app_docker_image }}
@@ -11,6 +12,11 @@ services:
       DATABASE_URL: "postgres://{{ app_db_user }}:{{ app_db_pass }}@postgres/{{ app_db_name }}"
       RUST_LOG: "info"
       RUST_BACKTRACE: 1
+      AUTH0_CLIENT_ID: "{{ lookup('env', 'AUTH0_CLIENT_ID') }}"
+      AUTH0_CLIENT_SECRET: "{{ lookup('env', 'AUTH0_CLIENT_SECRET') }}"
+      AUTH0_BASE_URL: "{{ lookup('env', 'AUTH0_BASE_URL') }}"
+      IGDB_CLIENT_ID: "{{ lookup('env', 'IGDB_CLIENT_ID') }}"
+      IGDB_CLIENT_SECRET: "{{ lookup('env', 'IGDB_CLIENT_SECRET') }}"
 
 networks:
   {{ nginx_network_name }}:
