@@ -7,6 +7,13 @@
   with_items:
     - "{{ app_directory }}"
 
+- name: Pull required images from docker hub
+  docker_image:
+    name: "{{ item }}"
+    source: pull
+  with_items:
+    - "{{ app_docker_image }}"
+
 - name: Create postgres db & user
   ansible.builtin.command: docker exec -it postgres /opt/scripts/create-database.sh {{ app_db_name }} {{ app_db_user }} {{ app_db_pass }}
   args:
@@ -21,4 +28,22 @@
   template:
     src: docker-compose.yml.j2
     dest: "{{ app_directory }}/docker-compose.yml"
-  # notify: restart app
+  notify: restart app
+
+- name: Create app service file
+  template:
+    src: "{{ app_service_name }}.service.j2"
+    dest: "{{ app_directory }}/{{ app_service_name }}.service"
+  notify: reload systemd
+
+- name: Install app service
+  file:
+    src: "{{ app_directory }}/{{ app_service_name }}.service"
+    dest: "/etc/systemd/system/{{ app_service_name }}.service"
+    state: link
+
+- name: ensure app starts on a fresh reboot
+  service:
+    name: "{{ app_service_name }}"
+    state: started
+    enabled: yes

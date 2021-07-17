@@ -1,6 +1,7 @@
 ---
 
 app_directory: '/opt/playday'
+app_service_name: 'playday'
 app_docker_image: 'default'
 app_db_name: 'playday'
 app_db_user: 'playday'
@@ -17,3 +18,5 @@ nginx_config_directory: '/opt/nginx/config'
 nginx_webhost_directory: '/opt/nginx/web'
 
 postgres_network_name: 'postgres_default'
+
+docker_compose_binary: /usr/local/bin/docker-compose

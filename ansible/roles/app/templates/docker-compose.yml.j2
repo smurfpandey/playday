@@ -1,6 +1,6 @@
 version: "3.9"  # optional since v1.27.0
 services:
-  app:
+  {{ app_service_name }}:
     image: {{ app_docker_image }}
     container_name: "playday_web"
     networks:
