@@ -17,6 +17,7 @@ services:
       AUTH0_BASE_URL: "{{ lookup('env', 'AUTH0_BASE_URL') }}"
       IGDB_CLIENT_ID: "{{ lookup('env', 'IGDB_CLIENT_ID') }}"
       IGDB_CLIENT_SECRET: "{{ lookup('env', 'IGDB_CLIENT_SECRET') }}"
+      SENTRY_DSN: "{{ lookup('env', 'SENTRY_DSN') }}"
 
 networks:
   {{ nginx_network_name }}:

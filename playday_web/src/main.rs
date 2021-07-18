@@ -39,6 +39,16 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
     env_logger::init();
 
+    let sentry_dsn = match env::var("SENTRY_DSN") {
+        Ok(dsn) => dsn,
+        Err(_err) => "".to_string(),
+    };
+
+    let _guard = sentry::init((sentry_dsn, sentry::ClientOptions {
+        release: sentry::release_name!(),
+        ..Default::default()
+    }));
+
     let pool: types::DBPool = db::establish_pool_connection();
 
     // let _ = embedded_migrations::run_with_output(&pool.get().unwrap(), &mut std::io::stdout());
@@ -48,6 +58,7 @@ async fn main() -> std::io::Result<()> {
         let tera = Tera::new("templates/**/*").unwrap();
         let igdb_client = web::Data::new(igdb::IGDB::new().unwrap());
         App::new()
+            .wrap(sentry_actix::Sentry::new())
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&[0; 32])
                     .name("auth-cookie")
