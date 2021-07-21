@@ -27,14 +27,13 @@
         <div class="flex p-4 pb-2 border-t border-gray-200"></div>
         <div class="flex space-x-3 text-sm font-medium">
           <div class="flex-auto flex space-x-3">
-            <div v-if="game.total_rating" class="mb-2 md:mb-0 bg-white px-5 py-2 shadow-sm tracking-wider border text-gray-600 rounded-full inline-flex items-center space-x-2">
-              <span class="text-green-400 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              </span>
-              <span>{{ parseInt(game.total_rating, 10) }}</span>
+            <template v-for="website in game.websites" :key="website.id">
+            <div v-if="getStore(website)" class="inline-flex items-center mr-2">
+              <a v-bind="{ href: website.url }" target="_blank">
+                <game-store-icon :store="getStore(website)" />
+              </a>
             </div>
+            </template>
           </div>
           <slot></slot>
         </div>
@@ -46,10 +45,12 @@
 <script>
 import RemoveGame from './remove-game.vue';
 import GamePlatformIcon from './game-platform-icon.vue';
+import GameStoreIcon from './game-store-icon.vue';
 
 export default {
   components: {
     GamePlatformIcon,
+    GameStoreIcon,
     RemoveGame,
   },
 
@@ -79,6 +80,17 @@ export default {
       }
       if(platform.platform_family === 1) {
         return { code: 'PS', name: platform.name };
+      }
+    },
+
+    getStore: (website) => {
+      switch(website.category) {
+        case 13: {
+          return { code: 'steam', name: 'Steam' };
+        }
+        case 16: {
+          return { code: 'epic', name: 'Epic Games' };
+        }
       }
     },
   }

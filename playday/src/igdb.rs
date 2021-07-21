@@ -52,6 +52,9 @@ pub struct IGDBGame {
     #[serde(default)]
     #[serde(rename = "total_rating")]
     pub total_rating: Option<f64>,
+
+    #[serde(default)]
+    pub websites: Option<Vec<Website>>
 }
 #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -99,6 +102,17 @@ pub struct ReleaseDate {
 
     pub human: String,
     pub platform: Platform,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Website {
+    pub id: i64,
+    pub category: i64,
+    pub game: i64,
+    pub trusted: bool,
+    pub url: String,
+    pub checksum: String,
 }
 
 const API_URL: &str = "https://api.igdb.com/v4";
@@ -173,7 +187,7 @@ impl IGDB {
             name, cover.image_id, parent_game.*, version_parent.*, total_rating, \
             release_dates.date, release_dates.*, release_dates.platform.slug, \
             release_dates.platform.name, release_dates.platform.platform_family, \
-            platforms.name, platforms.slug; \
+            platforms.name, platforms.slug, websites.*; \
             where version_parent = null & parent_game = null;\
         ",
             name_to_search = search_keyword
