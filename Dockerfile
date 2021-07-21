@@ -1,3 +1,17 @@
+FROM rust:1.53-buster as planner
+WORKDIR app
+# We only pay the installation cost once,
+# it will be cached from the second build onwards
+RUN cargo install cargo-chef
+COPY . .
+RUN cargo chef prepare  --recipe-path recipe.json
+
+FROM rust:1.53-buster as cacher
+WORKDIR app
+RUN cargo install cargo-chef
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
 FROM rust:1.53-buster as builder
 
 ENV LANG C.UTF-8
@@ -16,8 +30,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     openssl \
     libssl-dev
 
-COPY . ./
-
+WORKDIR app
+COPY . .
+# Copy over the cached dependencies
+COPY --from=cacher /app/target target
+COPY --from=cacher $CARGO_HOME $CARGO_HOME
 RUN cargo build --release
 
 ##########################################
@@ -48,9 +65,9 @@ RUN groupadd $APP_USER \
 # Create and switch to a new user
 WORKDIR /usr/app
 
-COPY --from=builder ./target/release/playday_web ./playday_web
-COPY --from=builder ./target/release/playday_celery_beat ./playday_celery_beat
-COPY --from=builder ./target/release/playday_celery_worker ./playday_celery_worker
+COPY --from=builder ./app/target/release/playday_web ./playday_web
+COPY --from=builder ./app/target/release/playday_celery_beat ./playday_celery_beat
+COPY --from=builder ./app/target/release/playday_celery_worker ./playday_celery_worker
 COPY --from=frontend-build ./playday_web/static/dist ./static/dist
 COPY ./playday_web/templates ./templates
 COPY ./diesel.toml .
