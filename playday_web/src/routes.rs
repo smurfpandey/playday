@@ -14,6 +14,7 @@ use url::Url;
 use uuid::Uuid;
 
 use crate::db;
+use crate::epicgames::EpicGames;
 use crate::igdb::{IGDBGame, IGDB};
 use crate::models;
 use crate::types;
@@ -225,7 +226,7 @@ pub async fn add_games_to_wishlist(
                         igdb_id: game.id.to_owned(),
                         added_on: Utc::now().naive_utc(),
                         igdb_info: serde_json::to_value(game).unwrap(),
-                        pc_release_date: game.get_pc_release_date()
+                        pc_release_date: game.get_pc_release_date(),
                     });
                 }
 
@@ -298,4 +299,29 @@ pub async fn remove_game_from_wishlist(
             Ok(HttpResponse::NoContent().finish())
         }
     }
+}
+
+// GET /connect/epicgames/login
+pub async fn login_via_epicgames(id: Identity, req: HttpRequest) -> Result<HttpResponse, Error> {
+    if let Some(_user) = is_logged_in(id) {
+    } else {
+        return Ok(HttpResponse::Unauthorized().finish());
+    }
+
+    let redirect_url = req
+        .url_for("epicgames_connect_callback", &[""])
+        .expect("Redirect URL not found");
+
+    let epic_games = EpicGames::new().unwrap();
+
+    let (auth_url, csrf_token) = epic_games.get_auth_url(&redirect_url.to_string());
+
+    Ok(HttpResponse::TemporaryRedirect()
+        .header("location", auth_url.to_string())
+        .finish())
+
+}
+
+pub async fn epicgames_connect_callback() -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::NoContent().finish())
 }

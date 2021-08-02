@@ -7,3 +7,4 @@ pub mod db;
 pub mod types;
 pub mod models;
 pub mod tasks;
+pub mod epicgames;

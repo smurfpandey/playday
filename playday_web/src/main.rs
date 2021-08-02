@@ -13,7 +13,7 @@ use oauth2::basic::BasicClient;
 use oauth2::{AuthUrl, ClientId, ClientSecret, TokenUrl};
 use tera::Tera;
 
-use playday::{db, igdb, models, types};
+use playday::{db, epicgames, igdb, models, types};
 mod routes;
 
 diesel_migrations::embed_migrations!();
@@ -86,6 +86,15 @@ async fn main() -> std::io::Result<()> {
                 web::resource("/login/callback")
                     .name("login_callback")
                     .route(web::get().to(routes::login_callback)),
+            )
+            .service(
+                web::scope("/connect")
+                    .route("/epicgames/login", web::get().to(routes::login_via_epicgames))
+            )
+            .service(
+                web::resource("/connect/epicgames/callback")
+                    .name("epicgames_connect_callback")
+                    .route(web::get().to(routes::epicgames_connect_callback)),
             )
             .wrap(Logger::default())
     })
