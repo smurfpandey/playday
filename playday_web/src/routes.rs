@@ -1,4 +1,5 @@
 use actix_identity::Identity;
+use actix_session::Session;
 use actix_web::{web, Error, HttpRequest, HttpResponse, Responder};
 use chrono::Utc;
 use diesel::prelude::PgConnection;
@@ -168,7 +169,7 @@ pub async fn login_callback(
     let user = web::block(move || login_user(&conn, &auth0_user))
         .await
         .map_err(|e| {
-            eprintln!("{}", e);
+            log::error!("Error saving user to db! {}", e);
             HttpResponse::InternalServerError().finish()
         })?;
 
@@ -302,7 +303,11 @@ pub async fn remove_game_from_wishlist(
 }
 
 // GET /connect/epicgames/login
-pub async fn login_via_epicgames(id: Identity, req: HttpRequest) -> Result<HttpResponse, Error> {
+pub async fn login_via_epicgames(
+    id: Identity,
+    req: HttpRequest,
+    session: Session,
+) -> Result<HttpResponse, Error> {
     if let Some(_user) = is_logged_in(id) {
     } else {
         return Ok(HttpResponse::Unauthorized().finish());
@@ -316,12 +321,65 @@ pub async fn login_via_epicgames(id: Identity, req: HttpRequest) -> Result<HttpR
 
     let (auth_url, csrf_token) = epic_games.get_auth_url(&redirect_url.to_string());
 
+    session.set("epic-connect-csrf", csrf_token.secret())?;
+
     Ok(HttpResponse::TemporaryRedirect()
         .header("location", auth_url.to_string())
         .finish())
-
 }
 
-pub async fn epicgames_connect_callback() -> Result<HttpResponse, Error> {
-    Ok(HttpResponse::NoContent().finish())
+pub async fn epicgames_connect_callback(
+    id: Identity,
+    params: web::Query<types::AuthRequest>,
+    pool: web::Data<types::DBPool>,
+    req: HttpRequest,
+    session: Session,
+) -> Result<HttpResponse, Error> {
+    match is_logged_in(id) {
+        None => return Ok(HttpResponse::Unauthorized().finish()),
+        Some(user) => {
+            let session_token = session.get::<String>("epic-connect-csrf").unwrap();
+            match session_token {
+                None => return Ok(HttpResponse::BadRequest().finish()),
+                Some(csrf_token) => {
+                    let state = CsrfToken::new(params.state.clone());
+                    let expected_state = CsrfToken::new(csrf_token);
+
+                    if expected_state.secret() != state.secret() {
+                        return Ok(HttpResponse::BadRequest().finish());
+                    }
+
+                    let redirect_url = req.url_for("epicgames_connect_callback", &[""]).unwrap();
+
+                    // Exchange the code with a token.
+                    let epic_games = EpicGames::new().unwrap();
+                    let token = epic_games
+                        .exchange_code_for_token(&params.code, &redirect_url.to_string())
+                        .unwrap();
+
+                    let game_store = models::GameStore {
+                        id: Uuid::new_v4(),
+                        user_id: user.id.to_owned(),
+                        added_on: Utc::now().naive_utc(),
+                        updated_on: Utc::now().naive_utc(),
+                        store_name: "EpicGames".to_string(),
+                        store_token: serde_json::to_value(token).unwrap(),
+                    };
+
+                    let conn = pool.get().unwrap();
+                    // use web::block to offload blocking Diesel code without blocking server thread
+                    let _save = web::block(move || db::save_epicgames_login(&conn, &game_store))
+                        .await
+                        .map_err(|e| {
+                            log::error!("Error saving epicgames info db! {}", e);
+                            HttpResponse::InternalServerError().finish()
+                        })?;
+
+                    Ok(HttpResponse::TemporaryRedirect()
+                        .header("location", "/")
+                        .finish())
+                }
+            }
+        }
+    }
 }

@@ -1,4 +1,15 @@
 table! {
+    game_stores (id) {
+        id -> Uuid,
+        store_name -> Varchar,
+        store_token -> Jsonb,
+        added_on -> Timestamp,
+        updated_on -> Timestamp,
+        user_id -> Uuid,
+    }
+}
+
+table! {
     users (id) {
         id -> Uuid,
         name -> Varchar,
@@ -20,9 +31,8 @@ table! {
     }
 }
 
-joinable!(wished_games -> users (user_id));
-
 allow_tables_to_appear_in_same_query!(
+    game_stores,
     users,
     wished_games,
 );

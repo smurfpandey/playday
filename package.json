@@ -11,8 +11,10 @@
     "watch": "webpack --watch",
     "start:client": "npm run dev && npm run watch",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:server": "docker-compose up -d db && cd playday_web && cargo-watch -x run",
-    "start": "concurrently \"npm run start:client\" \"npm run start:server\""
+    "start:db": "docker-compose up -d db",
+    "start:caddy": "docker-compose up -d caddy",
+    "start:server": "npm run start:db && cd playday_web && cargo-watch -x run",
+    "start": "concurrently \"npm run start:client\" \"npm run start:server\" \"npm run start:caddy\""
   },
   "devDependencies": {
     "@vue/compiler-sfc": "^3.1.1",

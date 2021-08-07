@@ -7,7 +7,7 @@ use diesel::result::Error;
 use diesel::r2d2::{self, ConnectionManager};
 use uuid::Uuid;
 
-use crate::models::{User, WishedGame};
+use crate::models::{User, WishedGame, GameStore};
 use crate::types;
 
 pub fn run_migrations(conn: &PgConnection) {
@@ -103,4 +103,16 @@ pub fn get_future_wishlist_games(db_conn: &PgConnection) -> Result<Vec<WishedGam
 
     let results = wished_games.filter(pc_release_date.gt(Utc::now().timestamp())).load::<WishedGame>(db_conn)?;
     Ok(results)
+}
+
+
+pub fn save_epicgames_login(db_conn: &PgConnection, game_store: &GameStore) -> Result<bool, Error> {
+    // It is common when using Diesel with Actix web to import schema-related
+    // modules inside a function's scope (rather than the normal module's scope)
+    // to prevent import collisions and namespace pollution.
+    use crate::schema::game_stores::dsl::*;
+
+    diesel::insert_into(game_stores).values(game_store).execute(db_conn)?;
+
+    Ok(true)
 }

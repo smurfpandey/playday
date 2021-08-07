@@ -8,4 +8,4 @@ members = [
 
 [patch.crates-io]
 celery = { git = 'https://github.com/rusty-celery/rusty-celery', branch = 'main' }
-oauth2 = { git = 'https://github.com/ramosbugs/oauth2-rs', branch = 'main' }
+oauth2 = { git = 'https://github.com/smurfpandey/oauth2-rs', branch = 'main' }

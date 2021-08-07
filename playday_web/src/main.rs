@@ -5,6 +5,7 @@ use std::env;
 
 use actix_files::Files;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_session::{CookieSession};
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 
@@ -64,7 +65,7 @@ async fn main() -> std::io::Result<()> {
                     .name("auth-cookie")
                     .secure(false),
             ))
-            .wrap(sentry_actix::Sentry::new())
+            .wrap(CookieSession::signed(&[0; 32]).secure(false))
             .data(pool.clone())
             .data(tera)
             .data(get_oauth_client())
@@ -90,12 +91,13 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/connect")
                     .route("/epicgames/login", web::get().to(routes::login_via_epicgames))
+                    .service(
+                        web::resource("/epicgames/callback")
+                            .name("epicgames_connect_callback")
+                            .route(web::get().to(routes::epicgames_connect_callback)),
+                    )
             )
-            .service(
-                web::resource("/connect/epicgames/callback")
-                    .name("epicgames_connect_callback")
-                    .route(web::get().to(routes::epicgames_connect_callback)),
-            )
+
             .wrap(Logger::default())
     })
     .workers(4) // <- Start 4 workers

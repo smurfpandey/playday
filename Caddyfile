@@ -1,0 +1,10 @@
+dev.playday.smurfville.app {
+    log stdout
+    # Mkcert - https://github.com/FiloSottile/mkcert
+    tls /root/certs/dev.playday.smurfville.app.pem /root/certs/dev.playday.smurfville.app-key.pem
+
+    proxy / http://host.docker.internal:8000 {
+        transparent
+        header_upstream Host  "dev.playday.smurfville.app"
+    }
+}

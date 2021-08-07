@@ -185,6 +185,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-session"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "559b815f2b3ad84f8a17256069d7df16c3ee8069635c86758729521d62ca891d"
+dependencies = [
+ "actix-service",
+ "actix-web",
+ "derive_more",
+ "futures-util",
+ "serde",
+ "serde_json",
+ "time 0.2.27",
+]
+
+[[package]]
 name = "actix-testing"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1959,8 +1974,8 @@ dependencies = [
 
 [[package]]
 name = "oauth2"
-version = "4.1.0"
-source = "git+https://github.com/ramosbugs/oauth2-rs?branch=main#d5b843806de56fcebc54ce9cb15b525f31a7352d"
+version = "4.1.1"
+source = "git+https://github.com/smurfpandey/oauth2-rs?branch=main#11697347f81f6fda82803283cabcf79b14dee206"
 dependencies = [
  "base64",
  "chrono",
@@ -2268,6 +2283,7 @@ version = "0.1.0"
 dependencies = [
  "actix-files",
  "actix-identity",
+ "actix-session",
  "actix-web",
  "anyhow",
  "chrono",
