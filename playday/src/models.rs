@@ -2,7 +2,7 @@ use super::schema::{game_stores, users, wished_games};
 use diesel::{Insertable, Queryable};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 pub struct GameStore {
     pub id: uuid::Uuid,
     pub store_name: String,

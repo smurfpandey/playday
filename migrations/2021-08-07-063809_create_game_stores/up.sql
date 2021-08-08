@@ -7,6 +7,7 @@ CREATE TABLE game_stores (
     updated_on TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     user_id UUID NOT NULL,
 
+    UNIQUE(store_name, user_id),
     CONSTRAINT fk_users
         FOREIGN KEY(user_id)
             REFERENCES users(id)

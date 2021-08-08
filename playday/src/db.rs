@@ -67,7 +67,7 @@ pub fn add_games_to_wishlist(db_conn: &PgConnection, games: &Vec<WishedGame>) ->
     use crate::schema::wished_games::dsl::*;
 
     diesel::insert_into(wished_games).values(games)
-        .on_conflict(igdb_id)
+        .on_conflict((igdb_id, user_id))
         .do_nothing()
         .execute(db_conn)?;
 
@@ -112,7 +112,11 @@ pub fn save_epicgames_login(db_conn: &PgConnection, game_store: &GameStore) -> R
     // to prevent import collisions and namespace pollution.
     use crate::schema::game_stores::dsl::*;
 
-    diesel::insert_into(game_stores).values(game_store).execute(db_conn)?;
+    diesel::insert_into(game_stores).values(game_store)
+        .on_conflict((store_name, user_id))
+        .do_update()
+        .set(game_store)
+        .execute(db_conn)?;
 
     Ok(true)
 }

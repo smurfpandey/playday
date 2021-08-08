@@ -90,12 +90,7 @@ async fn main() -> std::io::Result<()> {
             )
             .service(
                 web::scope("/connect")
-                    .route("/epicgames/login", web::get().to(routes::login_via_epicgames))
-                    .service(
-                        web::resource("/epicgames/callback")
-                            .name("epicgames_connect_callback")
-                            .route(web::get().to(routes::epicgames_connect_callback)),
-                    )
+                    .route("/epicgames/login", web::post().to(routes::login_via_epicgames))
             )
 
             .wrap(Logger::default())
