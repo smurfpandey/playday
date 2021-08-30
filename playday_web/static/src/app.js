@@ -5,8 +5,10 @@ import { createApp } from 'vue';
 import * as dayjs from 'dayjs';
 import VueApp from './vue/App.vue';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(relativeTime);
+dayjs.extend(utc);
 function App() {
 
     const initPage = (pageName) => {
@@ -26,6 +28,12 @@ function App() {
                     const dtTimestamp = dayjs.unix(value);
                     return dtTimestamp.fromNow();
                 },
+                iso8601ToRelative: (value) => {
+                    if (!value) return '';
+
+                    const dtTimestamp = dayjs.utc(value);
+                    return dtTimestamp.fromNow();
+                }
             };
 
             homeApp.mount('#app');

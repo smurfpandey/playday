@@ -1,4 +1,5 @@
 module.exports = {
+    important: true,
     future: {},
     purge: [],
     darkMode: false,
@@ -15,7 +16,12 @@ module.exports = {
             }
         }
     },
-    variants: {},
+    variants: {
+        extend: {
+          opacity: ['disabled'],
+          cursor: ['disabled']
+        }
+      },
     plugins: [
         require('@tailwindcss/typography')
     ],

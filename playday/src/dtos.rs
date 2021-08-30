@@ -1,5 +1,5 @@
 use super::schema::{game_stores};
-use diesel::{Insertable, Queryable};
+use diesel::{Queryable};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, QueryableByName, AsChangeset, PartialEq)]

@@ -328,7 +328,7 @@ pub async fn login_via_epicgames(
                 user_id: user.id.to_owned(),
                 added_on: Utc::now().naive_utc(),
                 updated_on: Utc::now().naive_utc(),
-                store_name: "EpicGames".to_string(),
+                store_name: "epicgames".to_string(),
                 store_token: serde_json::to_value(token).unwrap(),
                 store_user_name: display_name,
             };
