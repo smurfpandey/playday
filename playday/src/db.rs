@@ -149,7 +149,14 @@ pub fn get_game_store_account(
 
     let store = game_stores
         .filter(user_id.eq(usr_id).and(store_name.eq(stre_name)))
-        .select((id, store_name, added_on, updated_on, user_id, store_user_name))
+        .select((
+            id,
+            store_name,
+            added_on,
+            updated_on,
+            user_id,
+            store_user_name,
+        ))
         .first::<dtos::GameStore>(db_conn)
         .optional()?;
 
@@ -167,8 +174,31 @@ pub fn get_user_game_stores(
 
     let stores = game_stores
         .filter(user_id.eq(usr_id))
-        .select((id, store_name, added_on, updated_on, user_id, store_user_name))
+        .select((
+            id,
+            store_name,
+            added_on,
+            updated_on,
+            user_id,
+            store_user_name,
+        ))
         .load::<dtos::GameStore>(db_conn)?;
 
     Ok(stores)
+}
+
+pub fn remove_game_store(
+    db_conn: &PgConnection,
+    usr_id: Uuid,
+    stre_name: &str,
+) -> Result<bool, Error> {
+    // It is common when using Diesel with Actix web to import schema-related
+    // modules inside a function's scope (rather than the normal module's scope)
+    // to prevent import collisions and namespace pollution.
+    use crate::schema::game_stores::dsl::*;
+
+    diesel::delete(game_stores.filter(user_id.eq(usr_id).and(store_name.eq(stre_name))))
+        .execute(db_conn)?;
+
+    Ok(true)
 }

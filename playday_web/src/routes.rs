@@ -357,7 +357,6 @@ pub async fn get_library_settings(
     match is_logged_in(id) {
         None => return Ok(HttpResponse::Unauthorized().finish()),
         Some(user) => {
-
             // use web::block to offload blocking Diesel code without blocking server thread
             Ok(web::block(move || {
                 let store_name = store_name.into_inner();
@@ -378,6 +377,32 @@ pub async fn get_library_settings(
                 log::error!("Error getting games from wishlist! {}", error);
                 HttpResponse::InternalServerError().finish()
             })?)
+        }
+    }
+}
+
+// DELETE /library/{store_name}/settings
+pub async fn disconnect_library(
+    id: Identity,
+    pool: web::Data<types::DBPool>,
+    store_name: web::Path<String>
+) -> Result<HttpResponse, Error> {
+    match is_logged_in(id) {
+        None => return Ok(HttpResponse::Unauthorized().finish()),
+        Some(user) => {
+            let store_name = store_name.into_inner();
+            let conn = pool.get().expect("couldn't get db connection from pool");
+
+            // use web::block to offload blocking Diesel code without blocking server thread
+            let _remove =
+                web::block(move || db::remove_game_store(&conn, user.id, &store_name))
+                    .await
+                    .map_err(|e| {
+                        log::error!("Error removing game from wishlist! {}", e);
+                        HttpResponse::InternalServerError().finish()
+                    })?;
+
+            Ok(HttpResponse::NoContent().finish())
         }
     }
 }
