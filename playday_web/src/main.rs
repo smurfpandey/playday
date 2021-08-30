@@ -80,7 +80,9 @@ async fn main() -> std::io::Result<()> {
                     .route(
                         "/wishlist/{game_id}",
                         web::delete().to(routes::remove_game_from_wishlist),
-                    ),
+                    )
+                    .route("/library/{store_name}/settings", web::get().to(routes::get_library_settings))
+
             )
             .service(Files::new("/static", "./static"))
             .service(

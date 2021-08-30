@@ -321,6 +321,7 @@ pub async fn login_via_epicgames(
             let auth_code = epic_games.get_exchange_token(&login_info.sid).unwrap();
 
             let token = epic_games.get_login_tokens(&auth_code).unwrap();
+            let display_name = token.display_name.clone();
 
             let game_store = models::GameStore {
                 id: Uuid::new_v4(),
@@ -329,6 +330,7 @@ pub async fn login_via_epicgames(
                 updated_on: Utc::now().naive_utc(),
                 store_name: "EpicGames".to_string(),
                 store_token: serde_json::to_value(token).unwrap(),
+                store_user_name: display_name,
             };
 
             let conn = pool.get().unwrap();
@@ -341,6 +343,41 @@ pub async fn login_via_epicgames(
                 })?;
 
             Ok(HttpResponse::Ok().finish())
+        }
+    }
+}
+
+
+// GET /library/{store_name}/settings
+pub async fn get_library_settings(
+    id: Identity,
+    pool: web::Data<types::DBPool>,
+    store_name: web::Path<String>
+) -> Result<HttpResponse, Error> {
+    match is_logged_in(id) {
+        None => return Ok(HttpResponse::Unauthorized().finish()),
+        Some(user) => {
+
+            // use web::block to offload blocking Diesel code without blocking server thread
+            Ok(web::block(move || {
+                let store_name = store_name.into_inner();
+
+                // Get Epic Library Settings
+                let conn = pool.get().expect("couldn't get db connection from pool");
+
+                let game_store = match db::get_game_store_account(&conn, user.id, &store_name) {
+                    Ok(account) => account,
+                    Err(e) => return Err(e),
+                };
+
+                Ok(game_store)
+            })
+            .await
+            .map(|game_store| HttpResponse::Ok().json(game_store))
+            .map_err(|error| {
+                log::error!("Error getting games from wishlist! {}", error);
+                HttpResponse::InternalServerError().finish()
+            })?)
         }
     }
 }

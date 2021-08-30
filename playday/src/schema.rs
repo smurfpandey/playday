@@ -6,6 +6,7 @@ table! {
         added_on -> Timestamp,
         updated_on -> Timestamp,
         user_id -> Uuid,
+        store_user_name -> Varchar,
     }
 }
 

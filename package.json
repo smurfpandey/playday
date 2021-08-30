@@ -36,6 +36,8 @@
     "webpack-cli": "^4.7.2"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.4.0",
+    "@tailwindcss/typography": "^0.4.1",
     "dayjs": "^1.10.5",
     "lodash-es": "^4.17.21"
   }

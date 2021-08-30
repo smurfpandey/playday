@@ -8,3 +8,4 @@ pub mod types;
 pub mod models;
 pub mod tasks;
 pub mod epicgames;
+pub mod dtos;
