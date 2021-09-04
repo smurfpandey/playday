@@ -7,6 +7,8 @@ use oauth2::basic::{
 use oauth2::StandardRevocableToken;
 use serde::Deserialize;
 
+use std::sync::Arc;
+
 pub type DBPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 #[derive(Deserialize)]
@@ -29,3 +31,5 @@ pub type OAuthClient = oauth2::Client<
     StandardRevocableToken,
     BasicRevocationErrorResponse,
 >;
+
+pub type CeleryApp = Arc<celery::Celery<celery::broker::AMQPBroker>>;

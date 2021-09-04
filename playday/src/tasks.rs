@@ -1,7 +1,25 @@
 use celery::task::TaskResult;
 use chrono::{Duration, TimeZone, Utc};
+use anyhow::Result;
+use celery::broker::AMQPBroker;
+
+use std::sync::Arc;
 
 use crate::db;
+
+const QUEUE_NAME: &str = "playday_celery";
+
+pub async fn get_celery_app() -> Result<Arc<celery::Celery<celery::broker::AMQPBroker>>> {
+    let my_app = celery::app!(
+        broker = AMQPBroker { std::env::var("AMQP_ADDR").unwrap() },
+        tasks = [whats_for_tomorrow],
+        task_routes = [
+            "*" => QUEUE_NAME,
+        ],
+    ).await?;
+
+    Ok(my_app)
+}
 
 #[celery::task]
 pub fn add(x: i32, y: i32) -> TaskResult<i32> {

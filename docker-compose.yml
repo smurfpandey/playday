@@ -1,10 +1,40 @@
 version: "3.9"  # optional since v1.27.0
 services:
+  rabbitmq:
+    image: rabbitmq:3.8.16-management-alpine
+    container_name: "playmq"
+    hostname: "playmq"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
   db:
     image: postgres:13.3-alpine
+    container_name: "playdb"
     ports:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: playday
       POSTGRES_USER: playday
       POSTGRES_DB: playday
+
+  caddy:
+    image: "abiosoft/caddy:latest"
+    volumes:
+      - ./ssl:/root/certs # to sync mkcert certificates to Caddy
+      - ./Caddyfile:/etc/Caddyfile  # to mount custom Caddyfile
+    ports:
+      - "443:2015"
+
+
+  beat:
+    image: smurfpandey/playday
+    container_name: "playday_beat"
+    command: "./playday_celery_beat"
+    depends_on:
+      - rabbitmq
+    environment:
+      RUST_LOG: "info"
+      RUST_BACKTRACE: 1
+      AMQP_ADDR: "amqp://guest:guest@rabbitmq//"
+
