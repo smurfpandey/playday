@@ -1,5 +1,6 @@
 use actix_identity::Identity;
 use actix_web::{web, Error, HttpRequest, HttpResponse, Responder};
+use anyhow::bail;
 use chrono::Utc;
 use diesel::prelude::PgConnection;
 use http::header::{HeaderValue, ACCEPT, AUTHORIZATION};
@@ -19,6 +20,7 @@ use crate::epicgames::EpicGames;
 use crate::igdb::{IGDBGame, IGDB};
 use crate::models;
 use crate::types;
+use crate::tasks;
 
 pub const MIME_TYPE_JSON: &str = "application/json";
 
@@ -401,6 +403,55 @@ pub async fn disconnect_library(
                         log::error!("Error removing game from wishlist! {}", e);
                         HttpResponse::InternalServerError().finish()
                     })?;
+
+            Ok(HttpResponse::NoContent().finish())
+        }
+    }
+}
+
+
+
+// POST /library/{store_name}/sync
+pub async fn sync_game_library(
+    id: Identity,
+    pool: web::Data<types::DBPool>,
+    store_name: web::Path<String>
+) -> Result<HttpResponse, Error> {
+    let EpicGames = "epicgames".to_string();
+    match is_logged_in(id) {
+        None => return Ok(HttpResponse::Unauthorized().finish()),
+        Some(user) => {
+            let store_name = store_name.into_inner();
+            let celery_app = match tasks::get_celery_app().await {
+                Ok(app) => app,
+                Err(error) => {
+                    log::error!("Error creating celery app! {}", error);
+                    return Ok(HttpResponse::InternalServerError().finish())
+                }
+            };
+
+            let task_future = match store_name {
+                x if x == EpicGames => {
+                    match celery_app.send_task(tasks::sync_epicgames_library::new(user.id.to_owned())).await {
+                        Ok(task) => task.task_id,
+                        Err(error) => {
+                            log::error!("Error sending task to celery app! {}", error);
+                            "E000".to_string()
+                        }
+                    }
+                },
+                _ => {
+                    log::error!("Unknown store name! {}", store_name);
+                    "E101".to_string()
+                },
+            };            
+
+            celery_app.close()
+            .await
+            .map_err(|error| {
+                log::error!("Error closing celery app! {}", error);
+                HttpResponse::InternalServerError().finish()
+            })?;
 
             Ok(HttpResponse::NoContent().finish())
         }

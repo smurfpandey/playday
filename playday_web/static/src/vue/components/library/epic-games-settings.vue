@@ -24,7 +24,7 @@
         <div class="text-right font-semibold mr-5">Last Update On: </div>
         <div class="col-span-2">{{ $filters.iso8601ToRelative(storeSettings.updated_on) }}</div>
         <div class="text-right font-semibold mr-5">Total Games: </div>
-        <div class="col-span-2">7</div>
+        <div class="col-span-2">{{ storeSettings.total_games || 0 }}&nbsp;<a href="#" @click.prevent="fnSyncLibrary">Refresh Library</a></div>
         <div class="col-span-3 text-right">
           <button @click.prevent="fnDisconnect" type="button" class="px-3 py-2 text-sm bg-red-600 rounded-md text-white outline-none focus:ring-4 shadow-lg transform active:scale-x-75 transition-transform flex float-right">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -159,13 +159,34 @@ export default {
       fnLoadSettings();
     });
 
+    const fnSyncLibrary = async () => {
+      isLoading.value = true;
+
+      const response = await fetch("/api/library/epicgames/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json;charset=utf-8",
+        },
+        body: JSON.stringify({
+          sid: loginSid.value
+        })
+      });
+
+      isLoading.value = false;
+
+      if (response.status !== 200) {
+        return alert("Halla bol!");
+      }
+    }
+
     return {
       isConnected,
       isLoading,
       storeSettings,
       fnDisconnect,
       loginSid,
-      fnConnectToEpicGames
+      fnConnectToEpicGames,
+      fnSyncLibrary
     };
   },
 };

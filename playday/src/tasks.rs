@@ -2,6 +2,7 @@ use celery::task::TaskResult;
 use chrono::{Duration, TimeZone, Utc};
 use anyhow::Result;
 use celery::broker::AMQPBroker;
+use uuid::Uuid;
 
 use std::sync::Arc;
 
@@ -12,7 +13,7 @@ const QUEUE_NAME: &str = "playday_celery";
 pub async fn get_celery_app() -> Result<Arc<celery::Celery<celery::broker::AMQPBroker>>> {
     let my_app = celery::app!(
         broker = AMQPBroker { std::env::var("AMQP_ADDR").unwrap() },
-        tasks = [whats_for_tomorrow],
+        tasks = [whats_for_tomorrow, sync_epicgames_library],
         task_routes = [
             "*" => QUEUE_NAME,
         ],
@@ -55,5 +56,10 @@ pub fn whats_for_tomorrow() -> TaskResult<bool> {
     // Get latest info from igdb incase release date is updated
     // update entry in db
 
+    Ok(true)
+}
+
+#[celery::task]
+pub async fn sync_epicgames_library(usr_id: Uuid) -> TaskResult<bool> {
     Ok(true)
 }

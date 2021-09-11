@@ -38,6 +38,9 @@ const config = {
             },
         ],
     },
+    watchOptions: {
+        ignored: ['target/', '**/*.rs']
+    },
 };
 
 module.exports = config;

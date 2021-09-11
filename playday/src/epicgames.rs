@@ -1,6 +1,7 @@
-use anyhow::Result;
-use reqwest::header;
+use anyhow::{bail, Result};
+use reqwest::{cookie, header, StatusCode, Url};
 use serde::Deserialize;
+use std::sync::Arc;
 
 pub struct EpicGames {
     http_client: reqwest::blocking::Client,
@@ -56,10 +57,17 @@ impl EpicGames {
         headers.insert("X-Epic-Strategy-Flags", "".parse().unwrap());
         headers.insert("X-Requested-With", "XMLHttpRequest".parse().unwrap());
         headers.insert("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101 Firefox/86.0".parse().unwrap());
+        //headers.insert(header::COOKIE, header::HeaderValue::from_str("EPIC_COUNTRY=US").unwrap());
+
+        let cookie = "EPIC_COUNTRY=US; Domain=www.epicgames.com";
+        let url = "https://www.epicgames.com".parse::<Url>().unwrap();
+
+        let jar = cookie::Jar::default();
+        jar.add_cookie_str(cookie, &url);
 
         let req_client = reqwest::blocking::Client::builder()
             .default_headers(headers)
-            .cookie_store(true)
+            .cookie_provider(Arc::new(jar))
             .build()
             .unwrap();
 
@@ -90,10 +98,26 @@ impl EpicGames {
         }
 
         let code_resp = req_client.post("https://www.epicgames.com/id/api/exchange/generate")
-            .header("X-XSRF-TOKEN", xsrf_token)
-            .send().unwrap().json::<ExchangeCode>().unwrap();
+            .header("X-XSRF-TOKEN", xsrf_token)            
+            .send()?;
 
-        Ok(code_resp.code)
+        let auth_code = match code_resp.status() {
+            StatusCode::OK => {
+                let auth_code = match code_resp.json::<ExchangeCode>() {
+                    Ok(auth_code) =>  auth_code,
+                    Err(_err) => { 
+                        bail!("Failed to parse code response"); 
+                    }
+                };
+
+                auth_code.code
+            },
+            s => {
+                bail!("Received error response status: {}", s);
+            },
+        };
+
+        Ok(auth_code)
     }
 
     pub fn get_login_tokens(&self, exchange_code: &str) -> Result<EpicGamesToken> {

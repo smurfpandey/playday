@@ -14,7 +14,7 @@ use oauth2::basic::BasicClient;
 use oauth2::{AuthUrl, ClientId, ClientSecret, TokenUrl};
 use tera::Tera;
 
-use playday::{db, epicgames, igdb, models, types};
+use playday::{db, epicgames, igdb, models, types, tasks};
 mod routes;
 
 diesel_migrations::embed_migrations!();
@@ -83,6 +83,7 @@ async fn main() -> std::io::Result<()> {
                     )
                     .route("/library/{store_name}/settings", web::get().to(routes::get_library_settings))
                     .route("/library/{store_name}/settings", web::delete().to(routes::disconnect_library))
+                    .route("/library/{store_name}/sync", web::post().to(routes::sync_game_library))
 
             )
             .service(Files::new("/static", "./static"))
